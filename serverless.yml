@@ -62,13 +62,6 @@ plugins:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: src/handler.hello
-    events:
-     - http:
-         path: hello
-         method: get
-         cors: true
   login:
     handler: src/handler.login
     events:
