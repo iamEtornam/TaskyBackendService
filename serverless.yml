@@ -20,6 +20,9 @@ service: tasky
 # Check out our docs for more details
 frameworkVersion: '2'
 
+package:
+  individually: true
+
 provider:
   name: aws
   runtime: nodejs12.x
@@ -29,6 +32,7 @@ provider:
 # you can overwrite defaults here
   stage: dev
   region: us-east-1
+  profile: default
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -68,6 +72,20 @@ functions:
       - http:
           path: login
           method: post
+          cors: true
+  getOrganizations:
+    handler: src/handler.getOrganizations
+    events:
+      - http:
+          path: getOrganizations
+          method: get
+          cors: true
+  getOrganizationById:
+    handler: src/handler.getOrganizationById
+    events:
+      - http:
+          path: getOrganizationById/{id}
+          method: get
           cors: true
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
