@@ -1,0 +1,10 @@
+# package directories
+node_modules
+jspm_packages
+serviceAccountKey.json
+
+# Serverless directories
+.serverless
+.aws-sam
+.idea
+.vscode
