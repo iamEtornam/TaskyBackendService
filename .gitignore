@@ -2,6 +2,7 @@
 node_modules
 jspm_packages
 serviceAccountKey.json
+src/config/config.json
 
 # Serverless directories
 .serverless
