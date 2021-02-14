@@ -1,5 +1,6 @@
 'use strict';
 const admin = require("firebase-admin");
+const mailgun = require("mailgun-js");
 const serviceAccount = require("../serviceAccountKey.json");
 const db = require('./models')
 const {
@@ -7,13 +8,21 @@ const {
 } = require("sequelize");
 const Organizations = db.organization;
 const Users = db.user;
+const env = process.env.NODE_ENV || 'mailserver';
+const config = require(__dirname + '/../config/config.json')[env];
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 
+const mg = mailgun({
+    apiKey: config.apiKey,
+    domain: config.domain
+});
+
+
 async function verifyToken(authorization) {
-   
+
     try {
         const result = authorization.split(' ')
         return await admin.auth().verifyIdToken(result[1])
@@ -118,7 +127,7 @@ module.exports.login = async event => {
 module.exports.getOrganizations = async event => {
     try {
         const token = await verifyToken(event.headers.Authorization)
-        if(token == null){
+        if (token == null) {
             return {
                 statusCode: 401,
                 headers: {
@@ -181,7 +190,7 @@ module.exports.getOrganizations = async event => {
 module.exports.getOrganizationById = async event => {
     try {
         const token = await verifyToken(event.headers.Authorization)
-        if(token == null){
+        if (token == null) {
             return {
                 statusCode: 401,
                 headers: {
@@ -248,7 +257,7 @@ module.exports.updateUserDepartment = async event => {
 
     try {
         const token = await verifyToken(event.headers.Authorization)
-        if(token == null){
+        if (token == null) {
             return {
                 statusCode: 401,
                 headers: {
@@ -261,12 +270,14 @@ module.exports.updateUserDepartment = async event => {
                 }),
             }
         }
-        const userId = await Users.update({department: department},{
+        const userId = await Users.update({
+            department: department
+        }, {
             where: {
                 user_id: token.uid
             }
         })
-        console.log(userId,'userId');
+        console.log(userId, 'userId');
         if (userId) {
             const updatedUser = await Users.findOne({
                 where: {
@@ -305,6 +316,54 @@ module.exports.updateUserDepartment = async event => {
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        };
+    }
+}
+
+/// invitation endpoint - new members are added by the creator by email invitation
+module.exports.inviteMembers = async event => {
+    const requestBody = JSON.parse(event.body);
+    const emails = requestBody.emails;
+    try {
+
+        for (const email in emails) {
+            const data = {
+                from: "Tasky Admin <postmaster@sandbox91cecc1fa57041c3820f03710bd133e0.mailgun.org>",
+                to: email,
+                subject: "Your Tasky Invitation is ready!",
+                text: "You are invited to join Tasky app."
+            };
+
+            if (email === (emails.length - 1)) {
+                const isSent = await mg.messages().send(data)
+                if (isSent) {
+                    return {
+                        statusCode: 200,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                        },
+                        body: JSON.stringify({
+                            status: true,
+                            message: 'Invitation sent!'
+                        }),
+                    };
+                } else {
+                    await mg.messages().send(data)
+                }
+            }
+        }
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
             },
             body: JSON.stringify({
                 status: false,
