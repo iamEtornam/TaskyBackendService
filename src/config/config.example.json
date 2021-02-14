@@ -37,5 +37,9 @@
       "acquire": 30000,
       "idle": 10000
       }
+  },
+  "mailserver":{
+    "apiKey":"<MAIL-GUN API KEY HERE>",
+    "domain":"<DOMAIN HRER>"
   }
 }
