@@ -336,7 +336,7 @@ module.exports.inviteMembers = async event => {
                 from: "Tasky Admin <postmaster@sandbox91cecc1fa57041c3820f03710bd133e0.mailgun.org>",
                 to: email,
                 subject: "Your Tasky Invitation is ready!",
-                text: "You are invited to join Tasky app."
+                text: "You are invited to join Tasky app." //Todo: add email invitation template
             };
 
             if (email === (emails.length - 1)) {
@@ -372,3 +372,5 @@ module.exports.inviteMembers = async event => {
         };
     }
 }
+
+module.exports.listMembers = async event => {}
