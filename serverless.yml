@@ -30,7 +30,7 @@ provider:
     shouldStartNameWithService: true
 
 # you can overwrite defaults here
-  stage: dev
+  stage: prod
   region: us-east-1
   profile: default
 
@@ -51,8 +51,8 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+environment:
+  NODE_ENV: production
 plugins:
   - serverless-offline
 
