@@ -35,9 +35,15 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 db.organization = require("./organization.js")(sequelize, Sequelize);
 db.user = require("./user.js")(sequelize, Sequelize);
+db.task = require("./task.js")(sequelize, Sequelize);
 db.organization.hasMany(db.user, { as: "members" });
+db.organization.hasMany(db.task, { as: "tasks" });
 db.user.belongsTo(db.organization, {
   foreignKey: "organizationId",
   as: "organization",
+});
+db.task.belongsTo(db.user, {
+  foreignKey: "created_by",
+  as: "user",
 });
 module.exports = db;
