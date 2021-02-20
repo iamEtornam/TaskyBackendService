@@ -8,8 +8,9 @@ const {
 } = require("sequelize");
 const Organizations = db.organization;
 const Users = db.user;
+const Tasks = db.task;
 const env = process.env.NODE_ENV || 'mailserver';
-const config = require(__dirname + '/../config/config.json')[env];
+const config = require(__dirname + '/config/config.json')[env];
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -374,3 +375,69 @@ module.exports.inviteMembers = async event => {
 }
 
 module.exports.listMembers = async event => {}
+
+
+//create new task
+module.exports.createTask = async event => {
+    const requestBody = JSON.parse(event.body);
+    const description = requestBody.description;
+    const due_date = requestBody.due_date;
+    const is_reminder = requestBody.is_reminder;
+    const assignees = requestBody.assignees;
+    const organization_id = requestBody.organization_id;
+    const created_by = requestBody.created_by;
+    const department = requestBody.department;
+
+    try {
+        const task = await Tasks.create({
+            description,
+            due_date,
+            is_reminder,
+            assignees,
+            organization_id,
+            created_by,
+            department
+        })
+
+        if(task){
+            return {
+                statusCode: 201,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'Task created successfully!',
+                    data: task
+                }),
+            };
+        }else{
+            return {
+                statusCode: 400,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Could not create task'
+                }),
+            };  
+        }
+        
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        };
+    }
+
+}
