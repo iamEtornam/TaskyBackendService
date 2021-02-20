@@ -4,6 +4,7 @@
     "mailgun-js": "^0.22.0",
     "pg": "^8.5.1",
     "sequelize": "^6.5.0",
+    "serverless": "^2.25.2",
     "serverless-offline": "^6.8.0"
   }
 }
