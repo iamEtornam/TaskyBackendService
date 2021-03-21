@@ -123,6 +123,84 @@ module.exports.login = async event => {
     }
 };
 
+/// create a new organization
+module.exports.createOrganization = async event => {
+    try {
+        const requestBody = JSON.parse(event.body);
+        const name = requestBody.name;
+        const logo = requestBody.logo;
+        const department = requestBody.department;
+
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Unauthorized'
+                }),
+            }
+        }
+        const organizations = await Organizations.create({
+            name,
+            logo,
+            department
+        })
+        if (organizations) {
+            
+            await Users.update({
+                organizationId: organizations.id
+            }, {
+                where: {
+                    user_id: token.uid
+                }
+            })
+
+            return {
+                statusCode: 201,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'Organization has been created.',
+                    data: organizations
+                }),
+            }
+        } else {
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Could not create organization'
+                }),
+            }
+        }
+
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        };
+    }
+}
+
 
 /// get all organizations
 module.exports.getOrganizations = async event => {
@@ -399,7 +477,7 @@ module.exports.createTask = async event => {
             department
         })
 
-        if(task){
+        if (task) {
             return {
                 statusCode: 201,
                 headers: {
@@ -412,7 +490,7 @@ module.exports.createTask = async event => {
                     data: task
                 }),
             };
-        }else{
+        } else {
             return {
                 statusCode: 400,
                 headers: {
@@ -423,9 +501,9 @@ module.exports.createTask = async event => {
                     status: false,
                     message: 'Could not create task'
                 }),
-            };  
+            };
         }
-        
+
     } catch (error) {
         return {
             statusCode: 400,
