@@ -115,6 +115,20 @@ functions:
           path: getUserInformation
           method: get
           cors: true
+  createTask:
+    handler: src/handler.createTask
+    events:
+      - http:
+          path: createTask
+          method: post
+          cors: true
+  listMembers:
+    handler: src/handler.listMembers
+    events:
+      - http:
+          path: listMembers/{organizationId}
+          method: get
+          cors: true
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

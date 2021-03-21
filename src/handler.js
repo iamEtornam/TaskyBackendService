@@ -151,7 +151,7 @@ module.exports.createOrganization = async event => {
             department
         })
         if (organizations) {
-            
+
             await Users.update({
                 organizationId: organizations.id
             }, {
@@ -360,7 +360,7 @@ module.exports.updateUserDepartment = async event => {
         if (userId) {
             const updatedUser = await Users.findOne({
                 where: {
-                    id: userId[0]
+                    user_id: token.uid
                 },
                 include: ["organization"],
             })
@@ -453,7 +453,7 @@ module.exports.inviteMembers = async event => {
 }
 
 
-/// update user department
+/// update user INFORMATION
 module.exports.getUserInformation = async event => {
 
     try {
@@ -519,7 +519,55 @@ module.exports.getUserInformation = async event => {
     }
 }
 
-module.exports.listMembers = async event => {}
+/// list user in an organization
+module.exports.listMembers = async event => {
+    try {
+        const users = await Users.findAll({
+            where: {
+                organizationId: event.pathParameters.organizationId
+            }
+        })
+
+        if (users) {
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'Users in the organization',
+                    data: users
+                }),
+            }
+        } else {
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'users not found'
+                }),
+            }
+        }
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        }
+    }
+}
 
 
 //create new task
