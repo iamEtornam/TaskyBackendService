@@ -108,6 +108,13 @@ functions:
           path: createOrganization
           method: post
           cors: true
+  getUserInformation:
+    handler: src/handler.getUserInformation
+    events:
+      - http:
+          path: getUserInformation
+          method: get
+          cors: true
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

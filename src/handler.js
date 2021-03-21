@@ -452,6 +452,73 @@ module.exports.inviteMembers = async event => {
     }
 }
 
+
+/// update user department
+module.exports.getUserInformation = async event => {
+
+    try {
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Unauthorized'
+                }),
+            }
+        }
+        const user = await Users.findOne({
+            where: {
+                user_id: token.uid
+            },
+            include: ["organization"],
+        })
+        if (user) {
+
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'User information',
+                    data: user
+                }),
+            }
+        } else {
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'user not found'
+                }),
+            }
+        }
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        };
+    }
+}
+
 module.exports.listMembers = async event => {}
 
 
