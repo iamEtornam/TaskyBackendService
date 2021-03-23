@@ -453,6 +453,75 @@ module.exports.inviteMembers = async event => {
 }
 
 
+module.exports.updateUserToken = async event => {
+    const requestBody = JSON.parse(event.body);
+    const fcm_token = requestBody.fcm_token;
+
+    try {
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Unauthorized'
+                }),
+            }
+        }
+        const userId = await Users.update({
+            fcm_token: fcm_token
+        }, {
+            where: {
+                user_id: token.uid
+            }
+        })
+        console.log(userId, 'userId');
+        if (userId) {
+
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'User token updated'
+                }),
+            }
+        } else {
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'user not found'
+                }),
+            }
+        }
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        };
+    }
+}
+
+
 /// update user INFORMATION
 module.exports.getUserInformation = async event => {
 

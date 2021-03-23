@@ -94,6 +94,13 @@ functions:
           path: updateUserDepartment
           method: put
           cors: true
+  updateUserToken:
+    handler: src/handler.updateUserToken
+    events:
+      - http:
+          path: updateUserToken
+          method: put
+          cors: true
   inviteMembers:
     handler: src/handler.inviteMembers
     events:
