@@ -42,8 +42,12 @@ db.user.belongsTo(db.organization, {
   foreignKey: "organizationId",
   as: "organization",
 });
-db.task.belongsTo(db.user, {
-  foreignKey: "created_by",
-  as: "user",
+db.task.belongsTo(db.organization, {
+  foreignKey: "organizationId",
+  as: "organization",
 });
+db.task.belongsTo(db.user, {
+	foreignKey: "created_by",
+	as: "creator",
+  });
 module.exports = db;

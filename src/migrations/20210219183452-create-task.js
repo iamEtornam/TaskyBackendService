@@ -20,13 +20,16 @@ module.exports = {
       assignees: {
         type: Sequelize.ARRAY(Sequelize.JSONB)
       },
-      organization_id: {
+      organizationId: {
         type: Sequelize.INTEGER
       },
       created_by: {
         type: Sequelize.INTEGER
       },
       department: {
+        type: Sequelize.STRING
+      },
+      status: {
         type: Sequelize.STRING
       },
       createdAt: {

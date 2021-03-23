@@ -18,9 +18,10 @@ module.exports = (sequelize, DataTypes) => {
     due_date: DataTypes.STRING,
     is_reminder: DataTypes.BOOLEAN,
     assignees: DataTypes.ARRAY(DataTypes.JSONB),
-    organization_id: DataTypes.INTEGER,
+    organizationId: DataTypes.INTEGER,
     created_by: DataTypes.INTEGER,
-    department: DataTypes.STRING
+    department: DataTypes.STRING,
+    status: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'task',

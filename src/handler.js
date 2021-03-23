@@ -594,7 +594,10 @@ module.exports.listMembers = async event => {
         const users = await Users.findAll({
             where: {
                 organizationId: event.pathParameters.organizationId
-            }
+            },
+            attributes: {
+                exclude: ['auth_token'] ///remove auth_token from the results
+            },
         })
 
         if (users) {
@@ -646,7 +649,7 @@ module.exports.createTask = async event => {
     const due_date = requestBody.due_date;
     const is_reminder = requestBody.is_reminder;
     const assignees = requestBody.assignees;
-    const organization_id = requestBody.organization_id;
+    const organizationId = requestBody.organization_id;
     const created_by = requestBody.created_by;
     const department = requestBody.department;
 
@@ -656,7 +659,7 @@ module.exports.createTask = async event => {
             due_date,
             is_reminder,
             assignees,
-            organization_id,
+            organizationId,
             created_by,
             department
         })
@@ -702,4 +705,76 @@ module.exports.createTask = async event => {
         };
     }
 
+}
+
+
+//get task by organization id
+module.exports.getTasks = async event => {
+    try {
+        const tasks = await Tasks.findAll({
+            where: {
+                organizationId: event.pathParameters.organizationId
+            },
+            attributes: {
+                exclude: ['auth_token'] ///remove auth_token from the results
+            },
+            include: ["organization","creator"],
+        })
+        if (tasks) {
+            const participants = [];
+            const allTasks = [];
+            console.log(tasks[0].created_by, 'tasks');
+
+            for (const iterator of tasks) {
+                for (const assignee of iterator.assignees) {
+                    const user = await Users.findOne({
+                        where: {
+                            id: assignee
+                        }
+                    })
+                    participants.push(user)
+                }
+                iterator.assignees = participants
+                allTasks.push(iterator)
+            }
+
+
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'List of tasks for Organization',
+                    data: allTasks
+                }),
+            };
+        } else {
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'No task found'
+                }),
+            };
+        }
+    } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        }
+    }
 }
