@@ -726,16 +726,22 @@ module.exports.getTasks = async event => {
             console.log(tasks[0].created_by, 'tasks');
 
             for (const iterator of tasks) {
-                for (const assignee of iterator.assignees) {
-                    const user = await Users.findOne({
-                        where: {
-                            id: assignee
+                if((tasks.indexOf(iterator) + 1) < tasks.length){
+                    for (const assignee of iterator.assignees) {
+                        const user = await Users.findOne({
+                            where: {
+                                id: assignee
+                            }
+                        })
+                        console.log(iterator.assignees.indexOf(assignee))
+                        if((iterator.assignees.indexOf(assignee) + 1) < iterator.assignees.length){
+                            participants.push(user)
                         }
-                    })
-                    participants.push(user)
+                    }
+                    iterator.assignees = participants
+                    allTasks.push(iterator)
                 }
-                iterator.assignees = participants
-                allTasks.push(iterator)
+
             }
 
 
