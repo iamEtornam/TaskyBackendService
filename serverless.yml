@@ -87,11 +87,11 @@ functions:
           path: getOrganizationById/{id}
           method: get
           cors: true
-  updateUserDepartment:
-    handler: src/handler.updateUserDepartment
+  updateUserTeam:
+    handler: src/handler.updateUserTeam
     events:
       - http:
-          path: updateUserDepartment
+          path: updateUserTeam
           method: put
           cors: true
   updateUserToken:
@@ -143,6 +143,21 @@ functions:
           path: getTasks/{organizationId}
           method: get
           cors: true
+  updateTaskStatus:
+    handler: src/handler.updateTaskStatus
+    events:
+      - http:
+          path: updateTaskStatus/{id}
+          method: put
+          cors: true
+  getTaskStatusCount:
+    handler: src/handler.getTaskStatusCount
+    events:
+      - http:
+          path: getTaskStatusCount/{userId}
+          method: get
+          cors: true
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
