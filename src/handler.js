@@ -975,13 +975,13 @@ module.exports.getTaskStatusCount = async event => {
         })
 
         stats.push({
-            todo: todoTask ?? 0
+            todo: todoTask == null ? 0 : todoTask
         })
         stats.push({
-            in_progress: inProgressTask ?? 0
+            in_progress: inProgressTask == null ? 0 : inProgressTask
         })
         stats.push({
-            completed: completedTask ?? 0
+            completed: completedTask == null ? 0 : completedTask
         })
 
         return {
