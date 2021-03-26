@@ -28,7 +28,7 @@ async function verifyToken(authorization) {
         const result = authorization.split(' ')
         return await admin.auth().verifyIdToken(result[1])
     } catch (error) {
-        console.log(error,'token error')
+        console.log(error, 'token error')
         return;
     }
 }
@@ -781,7 +781,7 @@ module.exports.getTasks = async event => {
             attributes: {
                 exclude: ['auth_token'] ///remove auth_token from the results
             },
-            include: ["organization","creator"],
+            include: ["organization", "creator"],
         })
         if (tasks) {
             const participants = [];
@@ -789,7 +789,7 @@ module.exports.getTasks = async event => {
             console.log(tasks[0].created_by, 'tasks');
 
             for (const iterator of tasks) {
-                if((tasks.indexOf(iterator) + 1) < tasks.length){
+                if ((tasks.indexOf(iterator) + 1) < tasks.length) {
                     for (const assignee of iterator.assignees) {
                         const user = await Users.findOne({
                             where: {
@@ -797,7 +797,7 @@ module.exports.getTasks = async event => {
                             }
                         })
                         console.log(iterator.assignees.indexOf(assignee))
-                        if((iterator.assignees.indexOf(assignee) + 1) < iterator.assignees.length){
+                        if ((iterator.assignees.indexOf(assignee) + 1) < iterator.assignees.length) {
                             participants.push(user)
                         }
                     }
@@ -854,10 +854,10 @@ module.exports.updateTaskStatus = async event => {
     const requestBody = JSON.parse(event.body);
     const status = requestBody.status;
 
-    try{
+    try {
 
         const token = await verifyToken(event.headers.Authorization)
-        console.log(event.headers.Authorization,'token')
+        console.log(event.headers.Authorization, 'token')
         if (token == null) {
             return {
                 statusCode: 401,
@@ -877,11 +877,11 @@ module.exports.updateTaskStatus = async event => {
                 id: event.pathParameters.id
             }
         })
-        if(task){
+        if (task) {
             const updatedTask = await task.update({
                 status: status
             })
-            if(updatedTask){
+            if (updatedTask) {
                 return {
                     statusCode: 200,
                     headers: {
@@ -893,7 +893,7 @@ module.exports.updateTaskStatus = async event => {
                         message: updatedTask
                     }),
                 };
-            } else{
+            } else {
                 return {
                     statusCode: 400,
                     headers: {
@@ -906,7 +906,7 @@ module.exports.updateTaskStatus = async event => {
                     }),
                 };
             }
-        }else{
+        } else {
             return {
                 statusCode: 404,
                 headers: {
@@ -919,7 +919,7 @@ module.exports.updateTaskStatus = async event => {
                 }),
             };
         }
-    }catch (error) {
+    } catch (error) {
         return {
             statusCode: 400,
             headers: {
@@ -937,7 +937,7 @@ module.exports.updateTaskStatus = async event => {
 
 ///get tasks status count
 module.exports.getTaskStatusCount = async event => {
-    try{
+    try {
         const token = await verifyToken(event.headers.Authorization)
         if (token == null) {
             return {
@@ -974,9 +974,15 @@ module.exports.getTaskStatusCount = async event => {
             }
         })
 
-        stats.push({todo: todoTask})
-        stats.push({in_progress: inProgressTask})
-        stats.push({completed: completedTask})
+        stats.push({
+            todo: todoTask ?? 0
+        })
+        stats.push({
+            in_progress: inProgressTask ?? 0
+        })
+        stats.push({
+            completed: completedTask ?? 0
+        })
 
         return {
             statusCode: 200,
@@ -986,11 +992,11 @@ module.exports.getTaskStatusCount = async event => {
             },
             body: JSON.stringify({
                 status: true,
-                message:'Statistic for Tasks',
+                message: 'Statistic for Tasks',
                 data: stats
             }),
         };
-    }catch (error) {
+    } catch (error) {
         return {
             statusCode: 400,
             headers: {
