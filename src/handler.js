@@ -28,6 +28,7 @@ async function verifyToken(authorization) {
         const result = authorization.split(' ')
         return await admin.auth().verifyIdToken(result[1])
     } catch (error) {
+        console.log(error,'token error')
         return;
     }
 }
@@ -129,7 +130,7 @@ module.exports.createOrganization = async event => {
         const requestBody = JSON.parse(event.body);
         const name = requestBody.name;
         const logo = requestBody.logo;
-        const department = requestBody.department;
+        const teams = requestBody.teams;
 
         const token = await verifyToken(event.headers.Authorization)
         if (token == null) {
@@ -141,14 +142,14 @@ module.exports.createOrganization = async event => {
                 },
                 body: JSON.stringify({
                     status: false,
-                    message: 'Unauthorized'
+                    message: 'Token has expired. Logout and Signin again.'
                 }),
             }
         }
         const organizations = await Organizations.create({
             name,
             logo,
-            department
+            teams
         })
         if (organizations) {
 
@@ -215,7 +216,7 @@ module.exports.getOrganizations = async event => {
                 },
                 body: JSON.stringify({
                     status: false,
-                    message: 'Unauthorized'
+                    message: 'Token has expired. Logout and Signin again.'
                 }),
             }
         }
@@ -278,7 +279,7 @@ module.exports.getOrganizationById = async event => {
                 },
                 body: JSON.stringify({
                     status: false,
-                    message: 'Unauthorized'
+                    message: 'Token has expired. Logout and Signin again.'
                 }),
             }
         }
@@ -329,10 +330,10 @@ module.exports.getOrganizationById = async event => {
     }
 }
 
-/// update user department
-module.exports.updateUserDepartment = async event => {
+/// update user team
+module.exports.updateUserTeam = async event => {
     const requestBody = JSON.parse(event.body);
-    const department = requestBody.department;
+    const team = requestBody.team;
 
     try {
         const token = await verifyToken(event.headers.Authorization)
@@ -345,12 +346,12 @@ module.exports.updateUserDepartment = async event => {
                 },
                 body: JSON.stringify({
                     status: false,
-                    message: 'Unauthorized'
+                    message: 'Token has expired. Logout and Signin again.'
                 }),
             }
         }
         const userId = await Users.update({
-            department: department
+            team: team
         }, {
             where: {
                 user_id: token.uid
@@ -406,10 +407,24 @@ module.exports.updateUserDepartment = async event => {
 
 /// invitation endpoint - new members are added by the creator by email invitation
 module.exports.inviteMembers = async event => {
-    const requestBody = JSON.parse(event.body);
-    const emails = requestBody.emails;
     try {
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
 
+        const requestBody = JSON.parse(event.body);
+        const emails = requestBody.emails;
         for (const email in emails) {
             const data = {
                 from: "Tasky Admin <postmaster@sandbox91cecc1fa57041c3820f03710bd133e0.mailgun.org>",
@@ -468,7 +483,7 @@ module.exports.updateUserToken = async event => {
                 },
                 body: JSON.stringify({
                     status: false,
-                    message: 'Unauthorized'
+                    message: 'Token has expired. Logout and Signin again.'
                 }),
             }
         }
@@ -536,7 +551,7 @@ module.exports.getUserInformation = async event => {
                 },
                 body: JSON.stringify({
                     status: false,
-                    message: 'Unauthorized'
+                    message: 'Token has expired. Logout and Signin again.'
                 }),
             }
         }
@@ -591,6 +606,21 @@ module.exports.getUserInformation = async event => {
 /// list user in an organization
 module.exports.listMembers = async event => {
     try {
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
+
         const users = await Users.findAll({
             where: {
                 organizationId: event.pathParameters.organizationId
@@ -651,9 +681,25 @@ module.exports.createTask = async event => {
     const assignees = requestBody.assignees;
     const organizationId = requestBody.organization_id;
     const created_by = requestBody.created_by;
-    const department = requestBody.department;
+    const team = requestBody.team;
+    const priority_level = requestBody.priority_level
 
     try {
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
+
         const task = await Tasks.create({
             description,
             due_date,
@@ -661,7 +707,8 @@ module.exports.createTask = async event => {
             assignees,
             organizationId,
             created_by,
-            department
+            team,
+            priority_level
         })
 
         if (task) {
@@ -711,6 +758,22 @@ module.exports.createTask = async event => {
 //get task by organization id
 module.exports.getTasks = async event => {
     try {
+
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
+
         const tasks = await Tasks.findAll({
             where: {
                 organizationId: event.pathParameters.organizationId
@@ -771,6 +834,163 @@ module.exports.getTasks = async event => {
             };
         }
     } catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        }
+    }
+}
+
+
+///update task completion
+module.exports.updateTaskStatus = async event => {
+    const requestBody = JSON.parse(event.body);
+    const status = requestBody.status;
+
+    try{
+
+        const token = await verifyToken(event.headers.Authorization)
+        console.log(event.headers.Authorization,'token')
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
+
+        const task = await Tasks.findOne({
+            where: {
+                id: event.pathParameters.id
+            }
+        })
+        if(task){
+            const updatedTask = await task.update({
+                status: status
+            })
+            if(updatedTask){
+                return {
+                    statusCode: 200,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    },
+                    body: JSON.stringify({
+                        status: true,
+                        message: updatedTask
+                    }),
+                };
+            } else{
+                return {
+                    statusCode: 400,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    },
+                    body: JSON.stringify({
+                        status: false,
+                        message: 'Could not update task status'
+                    }),
+                };
+            }
+        }else{
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'No task found'
+                }),
+            };
+        }
+    }catch (error) {
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        }
+    }
+}
+
+
+///get tasks status count
+module.exports.getTaskStatusCount = async event => {
+    try{
+        // const token = await verifyToken(event.headers.Authorization)
+        // if (token == null) {
+        //     return {
+        //         statusCode: 401,
+        //         headers: {
+        //             'Access-Control-Allow-Origin': '*',
+        //             'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+        //         },
+        //         body: JSON.stringify({
+        //             status: false,
+        //             message: 'Token has expired. Logout and Signin again.'
+        //         }),
+        //     }
+        // }
+        const stats = []
+        const todoTask = await Tasks.count({
+            where: {
+                created_by: event.pathParameters.userId,
+                status: 'todo'
+            }
+        })
+
+        const inProgressTask = await Tasks.count({
+            where: {
+                created_by: event.pathParameters.userId,
+                status: 'in progress'
+            }
+        })
+
+        const completedTask = await Tasks.count({
+            where: {
+                created_by: event.pathParameters.userId,
+                status: 'completed'
+            }
+        })
+
+        stats.push({todo: todoTask})
+        stats.push({in_progress: inProgressTask})
+        stats.push({completed: completedTask})
+
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: true,
+                message:'Statistic for Tasks',
+                data: stats
+            }),
+        };
+    }catch (error) {
         return {
             statusCode: 400,
             headers: {
