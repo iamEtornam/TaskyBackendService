@@ -938,20 +938,20 @@ module.exports.updateTaskStatus = async event => {
 ///get tasks status count
 module.exports.getTaskStatusCount = async event => {
     try{
-        // const token = await verifyToken(event.headers.Authorization)
-        // if (token == null) {
-        //     return {
-        //         statusCode: 401,
-        //         headers: {
-        //             'Access-Control-Allow-Origin': '*',
-        //             'Access-Control-Allow-Methods': 'PUT, OPTIONS',
-        //         },
-        //         body: JSON.stringify({
-        //             status: false,
-        //             message: 'Token has expired. Logout and Signin again.'
-        //         }),
-        //     }
-        // }
+        const token = await verifyToken(event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
         const stats = []
         const todoTask = await Tasks.count({
             where: {
