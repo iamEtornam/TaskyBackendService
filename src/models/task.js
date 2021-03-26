@@ -16,12 +16,22 @@ module.exports = (sequelize, DataTypes) => {
   task.init({
     description: DataTypes.TEXT,
     due_date: DataTypes.STRING,
-    is_reminder: DataTypes.BOOLEAN,
+    is_reminder: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
     assignees: DataTypes.ARRAY(DataTypes.JSONB),
     organizationId: DataTypes.INTEGER,
     created_by: DataTypes.INTEGER,
-    department: DataTypes.STRING,
-    status: DataTypes.STRING
+    team: DataTypes.STRING,
+    priority_level: {
+      type: DataTypes.STRING,
+      defaultValue: "Low"
+    },
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: "todo"
+    }
   }, {
     sequelize,
     modelName: 'task',

@@ -26,10 +26,13 @@ module.exports = {
       created_by: {
         type: Sequelize.INTEGER
       },
-      department: {
+      team: {
         type: Sequelize.STRING
       },
       status: {
+        type: Sequelize.STRING
+      },
+      priority_level: {
         type: Sequelize.STRING
       },
       createdAt: {

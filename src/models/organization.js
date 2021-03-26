@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   organization.init({
     name: DataTypes.STRING,
     logo: DataTypes.STRING,
-    department: DataTypes.ARRAY(DataTypes.STRING)
+    teams: DataTypes.ARRAY(DataTypes.STRING)
   }, {
     sequelize,
     modelName: 'organization',

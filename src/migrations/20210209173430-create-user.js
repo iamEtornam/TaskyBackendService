@@ -17,7 +17,7 @@ module.exports = {
       organizationId: {
         type: Sequelize.INTEGER
       },
-      department: {
+      team: {
         type: Sequelize.STRING
       },
       fcm_token: {
