@@ -41,5 +41,8 @@
   "mailserver":{
     "apiKey":"<MAIL-GUN API KEY HERE>",
     "domain":"<DOMAIN HRER>"
+  },
+  "sentry":{
+    "apiKey":"API-KEY-HERE"
   }
 }
