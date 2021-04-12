@@ -6,11 +6,20 @@ const db = require('./models')
 const {
     Op
 } = require("sequelize");
+const Sentry = require("@sentry/serverless");
 const Organizations = db.organization;
 const Users = db.user;
 const Tasks = db.task;
 const env = process.env.NODE_ENV || 'mailserver';
 const config = require(__dirname + '/config/config.json')[env];
+
+Sentry.AWSLambda.init({
+    dsn: config['sentry'].apiKey,
+  
+    // We recommend adjusting this value in production, or using tracesSampler
+    // for finer control
+    tracesSampleRate: 1.0,
+  });
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
@@ -48,7 +57,7 @@ function updateOrCreate(model, values, condition) {
 }
 
 /// verify token code from client and return user data
-module.exports.login = async event => {
+module.exports.login = Sentry.AWSLambda.wrapHandler(async event => {
     const requestBody = JSON.parse(event.body);
     const token = requestBody.token;
 
@@ -110,6 +119,7 @@ module.exports.login = async event => {
             };
         }
     } catch (e) {
+        Sentry.captureException(e);
         return {
             statusCode: 400,
             headers: {
@@ -122,10 +132,10 @@ module.exports.login = async event => {
             }),
         };
     }
-};
+});
 
 /// create a new organization
-module.exports.createOrganization = async event => {
+module.exports.createOrganization = Sentry.AWSLambda.wrapHandler(async event => {
     try {
         const requestBody = JSON.parse(event.body);
         const name = requestBody.name;
@@ -188,6 +198,7 @@ module.exports.createOrganization = async event => {
         }
 
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -200,11 +211,11 @@ module.exports.createOrganization = async event => {
             }),
         };
     }
-}
+})
 
 
 /// get all organizations
-module.exports.getOrganizations = async event => {
+module.exports.getOrganizations = Sentry.AWSLambda.wrapHandler(async event => {
     try {
         const token = await verifyToken(event.headers.Authorization)
         if (token == null) {
@@ -252,6 +263,7 @@ module.exports.getOrganizations = async event => {
             }
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -264,10 +276,10 @@ module.exports.getOrganizations = async event => {
             }),
         };
     }
-}
+})
 
 /// get an organization by id
-module.exports.getOrganizationById = async event => {
+module.exports.getOrganizationById = Sentry.AWSLambda.wrapHandler(async event => {
     try {
         const token = await verifyToken(event.headers.Authorization)
         if (token == null) {
@@ -316,6 +328,7 @@ module.exports.getOrganizationById = async event => {
             }
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -328,10 +341,10 @@ module.exports.getOrganizationById = async event => {
             }),
         };
     }
-}
+})
 
 /// update user team
-module.exports.updateUserTeam = async event => {
+module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async event => {
     const requestBody = JSON.parse(event.body);
     const team = requestBody.team;
 
@@ -391,6 +404,7 @@ module.exports.updateUserTeam = async event => {
             }
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -403,10 +417,10 @@ module.exports.updateUserTeam = async event => {
             }),
         };
     }
-}
+})
 
 /// invitation endpoint - new members are added by the creator by email invitation
-module.exports.inviteMembers = async event => {
+module.exports.inviteMembers = Sentry.AWSLambda.wrapHandler(async event => {
     try {
         const token = await verifyToken(event.headers.Authorization)
         if (token == null) {
@@ -453,6 +467,7 @@ module.exports.inviteMembers = async event => {
             }
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -465,10 +480,10 @@ module.exports.inviteMembers = async event => {
             }),
         };
     }
-}
+})
 
 
-module.exports.updateUserToken = async event => {
+module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
     const requestBody = JSON.parse(event.body);
     const fcm_token = requestBody.fcm_token;
 
@@ -522,6 +537,7 @@ module.exports.updateUserToken = async event => {
             }
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -534,11 +550,11 @@ module.exports.updateUserToken = async event => {
             }),
         };
     }
-}
+})
 
 
 /// update user INFORMATION
-module.exports.getUserInformation = async event => {
+module.exports.getUserInformation = Sentry.AWSLambda.wrapHandler(async event => {
 
     try {
         const token = await verifyToken(event.headers.Authorization)
@@ -589,6 +605,7 @@ module.exports.getUserInformation = async event => {
             }
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -601,10 +618,10 @@ module.exports.getUserInformation = async event => {
             }),
         };
     }
-}
+})
 
 /// list user in an organization
-module.exports.listMembers = async event => {
+module.exports.listMembers = Sentry.AWSLambda.wrapHandler(async event => {
     try {
         const token = await verifyToken(event.headers.Authorization)
         if (token == null) {
@@ -657,6 +674,7 @@ module.exports.listMembers = async event => {
             }
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -669,11 +687,11 @@ module.exports.listMembers = async event => {
             }),
         }
     }
-}
+})
 
 
 //create new task
-module.exports.createTask = async event => {
+module.exports.createTask = Sentry.AWSLambda.wrapHandler(async event => {
     const requestBody = JSON.parse(event.body);
     const description = requestBody.description;
     const due_date = requestBody.due_date;
@@ -739,6 +757,7 @@ module.exports.createTask = async event => {
         }
 
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -752,11 +771,11 @@ module.exports.createTask = async event => {
         };
     }
 
-}
+})
 
 
 //get task by organization id
-module.exports.getTasks = async event => {
+module.exports.getTasks = Sentry.AWSLambda.wrapHandler(async event => {
     try {
 
         const token = await verifyToken(event.headers.Authorization)
@@ -834,6 +853,7 @@ module.exports.getTasks = async event => {
             };
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -846,11 +866,11 @@ module.exports.getTasks = async event => {
             }),
         }
     }
-}
+})
 
 
 ///update task completion
-module.exports.updateTaskStatus = async event => {
+module.exports.updateTaskStatus = Sentry.AWSLambda.wrapHandler(async event => {
     const requestBody = JSON.parse(event.body);
     const status = requestBody.status;
 
@@ -920,6 +940,7 @@ module.exports.updateTaskStatus = async event => {
             };
         }
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -932,11 +953,11 @@ module.exports.updateTaskStatus = async event => {
             }),
         }
     }
-}
+})
 
 
 ///get tasks status count
-module.exports.getTaskStatusCount = async event => {
+module.exports.getTaskStatusCount = Sentry.AWSLambda.wrapHandler(async event => {
     try {
         const token = await verifyToken(event.headers.Authorization)
         if (token == null) {
@@ -997,6 +1018,7 @@ module.exports.getTaskStatusCount = async event => {
             }),
         };
     } catch (error) {
+        Sentry.captureException(error);
         return {
             statusCode: 400,
             headers: {
@@ -1009,4 +1031,4 @@ module.exports.getTaskStatusCount = async event => {
             }),
         }
     }
-}
+})
