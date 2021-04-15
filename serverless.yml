@@ -143,11 +143,11 @@ functions:
           path: getTasks/{organizationId}
           method: get
           cors: true
-  updateTaskStatus:
-    handler: src/handler.updateTaskStatus
+  updateTask:
+    handler: src/handler.updateTask
     events:
       - http:
-          path: updateTaskStatus/{id}
+          path: updateTask/{id}
           method: put
           cors: true
   getTaskStatusCount:
