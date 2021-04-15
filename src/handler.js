@@ -11,10 +11,11 @@ const Organizations = db.organization;
 const Users = db.user;
 const Tasks = db.task;
 const env = process.env.NODE_ENV || 'mailserver';
-const config = require(__dirname + '/config/config.json')[env];
+const mailConfig = require(__dirname + '/config/config.json')[env];
+const config = require(__dirname + '/config/config.json')['sentry'];
 
 Sentry.AWSLambda.init({
-    dsn: config['sentry'].apiKey,
+    dsn: config.apiKey,
   
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
@@ -26,8 +27,8 @@ admin.initializeApp({
 });
 
 const mg = mailgun({
-    apiKey: config.apiKey,
-    domain: config.domain
+    apiKey: mailConfig.apiKey,
+    domain: mailConfig.domain
 });
 
 
@@ -142,7 +143,7 @@ module.exports.createOrganization = Sentry.AWSLambda.wrapHandler(async event => 
         const logo = requestBody.logo;
         const teams = requestBody.teams;
 
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -217,7 +218,7 @@ module.exports.createOrganization = Sentry.AWSLambda.wrapHandler(async event => 
 /// get all organizations
 module.exports.getOrganizations = Sentry.AWSLambda.wrapHandler(async event => {
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -281,7 +282,7 @@ module.exports.getOrganizations = Sentry.AWSLambda.wrapHandler(async event => {
 /// get an organization by id
 module.exports.getOrganizationById = Sentry.AWSLambda.wrapHandler(async event => {
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -349,7 +350,7 @@ module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async event => {
     const team = requestBody.team;
 
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -422,7 +423,7 @@ module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async event => {
 /// invitation endpoint - new members are added by the creator by email invitation
 module.exports.inviteMembers = Sentry.AWSLambda.wrapHandler(async event => {
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -488,7 +489,7 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
     const fcm_token = requestBody.fcm_token;
 
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -557,7 +558,7 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
 module.exports.getUserInformation = Sentry.AWSLambda.wrapHandler(async event => {
 
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -623,7 +624,7 @@ module.exports.getUserInformation = Sentry.AWSLambda.wrapHandler(async event => 
 /// list user in an organization
 module.exports.listMembers = Sentry.AWSLambda.wrapHandler(async event => {
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -703,7 +704,7 @@ module.exports.createTask = Sentry.AWSLambda.wrapHandler(async event => {
     const priority_level = requestBody.priority_level
 
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -777,8 +778,8 @@ module.exports.createTask = Sentry.AWSLambda.wrapHandler(async event => {
 //get task by organization id
 module.exports.getTasks = Sentry.AWSLambda.wrapHandler(async event => {
     try {
-
-        const token = await verifyToken(event.headers.Authorization)
+console.log(event.headers);
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
@@ -870,14 +871,21 @@ module.exports.getTasks = Sentry.AWSLambda.wrapHandler(async event => {
 
 
 ///update task completion
-module.exports.updateTaskStatus = Sentry.AWSLambda.wrapHandler(async event => {
+module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
     const requestBody = JSON.parse(event.body);
     const status = requestBody.status;
+    const description = requestBody.description;
+    const due_date = requestBody.due_date;
+    const is_reminder = requestBody.is_reminder;
+    const assignees = requestBody.assignees;
+    const team = requestBody.team;
+    const priority_level = requestBody.priority_level
 
     try {
 
-        const token = await verifyToken(event.headers.Authorization)
-        console.log(event.headers.Authorization, 'token')
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
+        
+        console.log(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization, 'token')
         if (token == null) {
             return {
                 statusCode: 401,
@@ -899,7 +907,13 @@ module.exports.updateTaskStatus = Sentry.AWSLambda.wrapHandler(async event => {
         })
         if (task) {
             const updatedTask = await task.update({
-                status: status
+                status: status || task.status,
+                description: description || task.description,
+                due_date: due_date || task.due_date,
+                is_reminder: is_reminder || task.is_reminder,
+                assignees: assignees || task.assignees,
+                team: team || task.team,
+                priority_level: priority_level || task.priority_level
             })
             if (updatedTask) {
                 return {
@@ -910,7 +924,8 @@ module.exports.updateTaskStatus = Sentry.AWSLambda.wrapHandler(async event => {
                     },
                     body: JSON.stringify({
                         status: true,
-                        message: updatedTask
+                        message: 'Task updated!',
+
                     }),
                 };
             } else {
@@ -945,7 +960,7 @@ module.exports.updateTaskStatus = Sentry.AWSLambda.wrapHandler(async event => {
             statusCode: 400,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
             },
             body: JSON.stringify({
                 status: false,
@@ -959,7 +974,7 @@ module.exports.updateTaskStatus = Sentry.AWSLambda.wrapHandler(async event => {
 ///get tasks status count
 module.exports.getTaskStatusCount = Sentry.AWSLambda.wrapHandler(async event => {
     try {
-        const token = await verifyToken(event.headers.Authorization)
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         if (token == null) {
             return {
                 statusCode: 401,
