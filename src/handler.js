@@ -871,6 +871,7 @@ console.log(event.headers);
 
 
 ///update task completion
+//TODO: send notification to all assignees of changes
 module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
     const requestBody = JSON.parse(event.body);
     const status = requestBody.status;
@@ -882,7 +883,6 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
     const priority_level = requestBody.priority_level
 
     try {
-
         const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
         
         console.log(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization, 'token')
@@ -916,6 +916,11 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
                 priority_level: priority_level || task.priority_level
             })
             if (updatedTask) {
+                const task = await Tasks.findOne({
+                    where: {
+                        id: event.pathParameters.id
+                    }
+                })
                 return {
                     statusCode: 200,
                     headers: {
@@ -925,7 +930,7 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
                     body: JSON.stringify({
                         status: true,
                         message: 'Task updated!',
-
+                        data:task
                     }),
                 };
             } else {
