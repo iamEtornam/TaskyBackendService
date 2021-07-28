@@ -1,6 +1,9 @@
 # TaskyBackendService
 This is the backend service for the [Tasky app](https://github.com/RegNex/Tasky-Mobile-App) platform. This is a serverless app written in nodejs.
 
+## Documentation
+You can locate the documentation for the web service [here](https://documenter.getpostman.com/view/2978812/TzscomU3)
+
 ## Requirements
 1. Nodejs 
 2. AWS Account or any other serverless function hosting solution
@@ -15,7 +18,7 @@ This is the backend service for the [Tasky app](https://github.com/RegNex/Tasky-
 ## To Run and Deploy
 To run offline the service assuming you already have [serverless](https://www.serverless.com/framework/docs/getting-started/) and [aws cli](https://aws.amazon.com/cli/) setup;
 
-```sls offline```
+```sls offline --stage=dev```
 
 To deploy
-```sls deploy```
+```sls deploy --stage=prod```
