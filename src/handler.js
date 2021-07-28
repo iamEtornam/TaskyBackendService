@@ -33,8 +33,13 @@ const mg = mailgun({
 
 
 async function verifyToken(authorization) {
-
+console.log(authorization,'authorization');
     try {
+
+        if(authorization === undefined){
+            return
+        }
+
         const result = authorization.split(' ')
         return await admin.auth().verifyIdToken(result[1])
     } catch (error) {
