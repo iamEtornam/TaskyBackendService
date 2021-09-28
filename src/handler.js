@@ -14,6 +14,8 @@ const env = process.env.NODE_ENV || 'mailserver';
 const mailConfig = require(__dirname + '/config/config.json')[env];
 const config = require(__dirname + '/config/config.json')['sentry'];
 
+//sudo serverless deploy --stage prod --region us-east-1 --aws-profile personal
+
 Sentry.AWSLambda.init({
     dsn: config.apiKey,
   
