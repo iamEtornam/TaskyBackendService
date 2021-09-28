@@ -25,14 +25,14 @@ package:
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   apiGateway:
     shouldStartNameWithService: true
 
 # you can overwrite defaults here
   stage: prod
   region: us-east-1
-  profile: default
+  profile: personal
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
