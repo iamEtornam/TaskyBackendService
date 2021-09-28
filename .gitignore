@@ -9,3 +9,4 @@ src/config/config.json
 .aws-sam
 .idea
 .vscode
+ngrok
