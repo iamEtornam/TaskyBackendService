@@ -10,6 +10,9 @@ const Sentry = require("@sentry/serverless");
 const Organizations = db.organization;
 const Users = db.user;
 const Tasks = db.task;
+const Inbox = db.inbox;
+const Comment = db.comment;
+const InboxComment = db.inbox_comment;
 const env = process.env.NODE_ENV || 'mailserver';
 const mailConfig = require(__dirname + '/config/config.json')[env];
 const config = require(__dirname + '/config/config.json')['sentry'];
@@ -1058,4 +1061,73 @@ module.exports.getTaskStatusCount = Sentry.AWSLambda.wrapHandler(async event => 
             }),
         }
     }
+})
+
+//*************** INBOX */
+module.exports.getUserInbox = Sentry.AWSLambda.wrapHandler(async event => {
+try {
+    const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
+    if (token == null) {
+        return {
+            statusCode: 401,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: 'Token has expired. Logout and Signin again.'
+            }),
+        }
+    }
+
+    const inbox = await Inbox.findAll({
+        where:{
+            userId:event.pathParameters.userId
+        },
+        include: ["comments", "user"],
+    })
+    if(inbox){
+
+        return {
+            statusCode: 200,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: true,
+                message: 'List of messages',
+                data: inbox
+            }),
+        };
+
+    }else{
+        return {
+            statusCode: 404,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: 'No Messages found'
+            }),
+        };
+    }
+    
+} catch (error) {
+    Sentry.captureException(error);
+    return {
+        statusCode: 400,
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        },
+        body: JSON.stringify({
+            status: false,
+            message: error.message
+        }),
+    }
+}
 })
