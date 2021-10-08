@@ -52,9 +52,11 @@ db.task.belongsTo(db.user, {
   });
 db.inbox = require("./inbox.js")(sequelize, Sequelize);
 db.comment = require("./comment")(sequelize, Sequelize);
-db.inbox_comment = require("./inbox_comment")(sequelize, Sequelize);
+// db.inbox_comment = require("./inbox_comment")(sequelize, Sequelize);
+
 db.inbox.hasMany(db.comment, { as: "comments" });
 db.comment.hasOne(db.inbox, { as: "inbox" });
+
 db.inbox.belongsTo(db.user, { 
   foreignKey: "userId",
   as: "user",
@@ -63,8 +65,12 @@ db.comment.belongsTo(db.user, {
   foreignKey: "userId",
   as: "user",
   });
-  db.user.hasMany(db.inbox, { 
-    foreignKey: "inboxId",
-    as: "inbox",
-    });
+//   db.user.hasMany(db.inbox, { 
+//     foreignKey: "userId",
+//     as: "user",
+//     });
+//     db.user.hasMany(db.comment, { 
+//       foreignKey: "userId",
+//       as: "user",
+//       });
 module.exports = db;
