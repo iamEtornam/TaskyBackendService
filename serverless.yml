@@ -32,7 +32,6 @@ provider:
 # you can overwrite defaults here
   stage: prod
   region: us-east-1
-  profile: personal
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
