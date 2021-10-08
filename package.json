@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "@sentry/serverless": "^6.2.3",
-    "firebase-admin": "^9.5.0",
+    "@sentry/serverless": "^6.13.3",
+    "firebase-admin": "^9.12.0",
     "mailgun-js": "^0.22.0",
-    "pg": "^8.5.1",
-    "sequelize": "^6.5.0",
-    "serverless": "^2.25.2",
-    "serverless-offline": "^6.9.0"
+    "pg": "^8.7.1",
+    "sequelize": "^6.6.5",
+    "serverless": "^2.62.0",
+    "serverless-offline": "^8.2.0"
   }
 }
