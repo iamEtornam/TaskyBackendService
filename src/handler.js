@@ -1085,8 +1085,12 @@ try {
         where:{
             userId:event.pathParameters.userId
         },
-        include: ["comments", "user"],
+        include: ["comments","user",],
+        attributes: {
+            exclude: ["inboxId","auth_token"] ///remove auth_token from the results
+        },
     })
+
     if(inbox){
 
         return {
@@ -1130,4 +1134,75 @@ try {
         }),
     }
 }
+})
+
+
+module.exports.getUserInboxComment = Sentry.AWSLambda.wrapHandler(async event => {
+    try {
+        // const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
+        // if (token == null) {
+        //     return {
+        //         statusCode: 401,
+        //         headers: {
+        //             'Access-Control-Allow-Origin': '*',
+        //             'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+        //         },
+        //         body: JSON.stringify({
+        //             status: false,
+        //             message: 'Token has expired. Logout and Signin again.'
+        //         }),
+        //     }
+        // }
+    
+        const coments = await Comment.findAll({
+            where:{
+                inboxId:event.pathParameters.inboxId
+            },
+            include: ["user",],
+        
+        })
+    
+        if(coments){
+    
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'List of comment of an inbox',
+                    data: coments
+                }),
+            };
+    
+        }else{
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'No comment found'
+                }),
+            };
+        }
+        
+    } catch (error) {
+        Sentry.captureException(error);
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        }
+    }
 })
