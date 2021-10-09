@@ -1139,20 +1139,20 @@ try {
 
 module.exports.getUserInboxComment = Sentry.AWSLambda.wrapHandler(async event => {
     try {
-        // const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
-        // if (token == null) {
-        //     return {
-        //         statusCode: 401,
-        //         headers: {
-        //             'Access-Control-Allow-Origin': '*',
-        //             'Access-Control-Allow-Methods': 'PUT, OPTIONS',
-        //         },
-        //         body: JSON.stringify({
-        //             status: false,
-        //             message: 'Token has expired. Logout and Signin again.'
-        //         }),
-        //     }
-        // }
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
     
         const coments = await Comment.findAll({
             where:{
