@@ -366,7 +366,7 @@ module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -393,7 +393,7 @@ module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 200,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: true,
@@ -406,7 +406,7 @@ module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 404,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -420,7 +420,7 @@ module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async event => {
             statusCode: 400,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
             },
             body: JSON.stringify({
                 status: false,
@@ -439,7 +439,7 @@ module.exports.inviteMembers = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -505,7 +505,7 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -527,7 +527,7 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 200,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: true,
@@ -539,7 +539,7 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 404,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -553,7 +553,7 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
             statusCode: 400,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
             },
             body: JSON.stringify({
                 status: false,
@@ -564,7 +564,7 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async event => {
 })
 
 
-/// update user INFORMATION
+/// get user INFORMATION
 module.exports.getUserInformation = Sentry.AWSLambda.wrapHandler(async event => {
 
     try {
@@ -631,6 +631,85 @@ module.exports.getUserInformation = Sentry.AWSLambda.wrapHandler(async event => 
     }
 })
 
+
+/// update user INFORMATION
+module.exports.updateUserInformation = Sentry.AWSLambda.wrapHandler(async event => {
+    try {
+        const requestBody = JSON.parse(event.body);
+        const name = requestBody.name;
+        const email = requestBody.email;
+        const phone = requestBody.phone_number;
+        const picture = requestBody.picture;
+
+        const token = await verifyToken(event.headers.Authorization === undefined ? event.headers.authorization : event.headers.Authorization)
+        if (token == null) {
+            return {
+                statusCode: 401,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'Token has expired. Logout and Signin again.'
+                }),
+            }
+        }
+        const user = await Users.update({
+            name: name,
+            phone_number: phone,
+            picture: picture
+        }, {
+            where: {
+                user_id: token.uid
+            }
+        })
+        console.log(user, 'userId');
+        if (user) {
+
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: true,
+                    message: 'User information updated',
+                    data: user
+                }),
+            }
+        } else {
+            return {
+                statusCode: 404,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
+                },
+                body: JSON.stringify({
+                    status: false,
+                    message: 'user not found'
+                }),
+            }
+        }
+        
+    } catch (error) {
+        Sentry.captureException(error);
+        return {
+            statusCode: 400,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
+            },
+            body: JSON.stringify({
+                status: false,
+                message: error.message
+            }),
+        };
+        
+    }
+})
+
 /// list user in an organization
 module.exports.listMembers = Sentry.AWSLambda.wrapHandler(async event => {
     try {
@@ -640,7 +719,7 @@ module.exports.listMembers = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -720,7 +799,7 @@ module.exports.createTask = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -795,7 +874,7 @@ console.log(event.headers);
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -901,7 +980,7 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -935,7 +1014,7 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
                     statusCode: 200,
                     headers: {
                         'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                        'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                     },
                     body: JSON.stringify({
                         status: true,
@@ -948,7 +1027,7 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
                     statusCode: 400,
                     headers: {
                         'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                        'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                     },
                     body: JSON.stringify({
                         status: false,
@@ -961,7 +1040,7 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
                 statusCode: 404,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -975,7 +1054,7 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async event => {
             statusCode: 400,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
             },
             body: JSON.stringify({
                 status: false,
@@ -995,7 +1074,7 @@ module.exports.getTaskStatusCount = Sentry.AWSLambda.wrapHandler(async event => 
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
@@ -1072,7 +1151,7 @@ try {
             statusCode: 401,
             headers: {
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
             },
             body: JSON.stringify({
                 status: false,
@@ -1145,7 +1224,7 @@ module.exports.getUserInboxComment = Sentry.AWSLambda.wrapHandler(async event =>
                 statusCode: 401,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                    'Access-Control-Allow-Methods': 'PATCH, OPTIONS',
                 },
                 body: JSON.stringify({
                     status: false,
