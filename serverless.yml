@@ -91,14 +91,21 @@ functions:
     events:
       - http:
           path: updateUserTeam
-          method: put
+          method: patch
           cors: true
   updateUserToken:
     handler: src/handler.updateUserToken
     events:
       - http:
           path: updateUserToken
-          method: put
+          method: patch
+          cors: true
+  updateUserInformation:
+    handler: src/handler.updateUserInformation
+    events:
+      - http:
+          path: updateUserInformation
+          method: patch
           cors: true
   inviteMembers:
     handler: src/handler.inviteMembers
@@ -147,7 +154,7 @@ functions:
     events:
       - http:
           path: updateTask/{id}
-          method: put
+          method: patch
           cors: true
   getTaskStatusCount:
     handler: src/handler.getTaskStatusCount
