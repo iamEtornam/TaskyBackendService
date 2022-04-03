@@ -1,0 +1,4 @@
+serviceAccountKey.json
+config/config.json
+node_modules
+.idea/
