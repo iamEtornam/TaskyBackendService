@@ -33,6 +33,6 @@ const mg = mailgun({
 });
 
 
-app.use('/', indexRouter);
+app.use('api/v1/', indexRouter);
 
 module.exports = app;
