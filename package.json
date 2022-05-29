@@ -7,7 +7,6 @@
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
-    "aws-sdk": "^2.1145.0",
     "cloudinary": "^1.30.0",
     "connect-multiparty": "^2.2.0",
     "crypto": "^1.0.1",
