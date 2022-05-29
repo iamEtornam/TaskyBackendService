@@ -44,5 +44,8 @@
   },
   "sentry":{
     "apiKey":"API-KEY-HERE"
-  }
+  },
+  "CLOUDINARY_API_KEY":"",
+  "CLOUDINARY_SECRET_KEY":"",
+  "CLOUD_NAME":""
 }
