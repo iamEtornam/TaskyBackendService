@@ -61,31 +61,23 @@ const login = async (req, res) => {
 };
 
 /// create a new organization
-module.exports.createOrganization = Sentry.AWSLambda.wrapHandler(
-  async (event) => {
+ const createOrganization = async (req, res) => {
     try {
-      const requestBody = JSON.parse(event.body);
+      const requestBody = req.body;
       const name = requestBody.name;
       const logo = requestBody.logo;
       const teams = requestBody.teams;
 
       const token = await verifyToken(
-        event.headers.Authorization === undefined
-          ? event.headers.authorization
-          : event.headers.Authorization
+        req.headers.Authorization === undefined
+          ? req.headers.authorization
+          : req.headers.Authorization
       );
       if (token == null) {
-        return {
-          statusCode: 401,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: false,
-            message: "Token has expired. Logout and Signin again.",
-          }),
-        };
+        return res.status(401).json({
+          status: false,
+          message: "Token has expired. Logout and Signin again.",
+        });
       }
       const organizations = await Organizations.create({
         name,
@@ -104,69 +96,42 @@ module.exports.createOrganization = Sentry.AWSLambda.wrapHandler(
           }
         );
 
-        return {
-          statusCode: 201,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: true,
-            message: "Organization has been created.",
-            data: organizations,
-          }),
-        };
+        return res.status(201).json({
+          status: true,
+          message: "Organization created successfully",
+          data: organizations,
+        });
       } else {
-        return {
-          statusCode: 404,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: false,
-            message: "Could not create organization",
-          }),
-        };
+        return res.status(400).json({
+          status: false,
+          message: "Could not create organization",
+          data: requestBody,
+        });
       }
     } catch (error) {
       Sentry.captureException(error);
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: error.message,
-        }),
-      };
+      return res.status(400).json({
+        status: false,
+        message: error.message,
+      });
     }
   }
-);
+
 
 /// get all organizations
-module.exports.getOrganizations = Sentry.AWSLambda.wrapHandler(
-  async (event) => {
+const getOrganizations = async (req, res) => {
+
     try {
       const token = await verifyToken(
-        event.headers.Authorization === undefined
-          ? event.headers.authorization
-          : event.headers.Authorization
+        req.headers.Authorization === undefined
+          ? req.headers.authorization
+          : req.headers.Authorization
       );
       if (token == null) {
-        return {
-          statusCode: 401,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: false,
-            message: "Token has expired. Logout and Signin again.",
-          }),
-        };
+        return res.status(401).json({
+          status: false,
+          message: "Token has expired. Logout and Signin again.",
+        });
       }
       const organizations = await Organizations.findAll({
         order: [["id", "DESC"]],
@@ -199,42 +164,29 @@ module.exports.getOrganizations = Sentry.AWSLambda.wrapHandler(
       }
     } catch (error) {
       Sentry.captureException(error);
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: error.message,
-        }),
-      };
+
+      return res.status(400).json({
+        status: false,
+        message: error.message,
+      });
     }
   }
-);
+
 
 /// get an organization by id
-module.exports.getOrganizationById = Sentry.AWSLambda.wrapHandler(
-  async (event) => {
+const getOrganizationById = async (req, res) => {
+
     try {
       const token = await verifyToken(
-        event.headers.Authorization === undefined
-          ? event.headers.authorization
-          : event.headers.Authorization
+        req.headers.Authorization === undefined
+          ? req.headers.authorization
+          : req.headers.Authorization
       );
       if (token == null) {
-        return {
-          statusCode: 401,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: false,
-            message: "Token has expired. Logout and Signin again.",
-          }),
-        };
+        return res.status(401).json({
+          status: false,
+          message: "Token has expired. Logout and Signin again.",
+        });
       }
       const organizations = await Organizations.findOne({
         where: {
@@ -270,44 +222,30 @@ module.exports.getOrganizationById = Sentry.AWSLambda.wrapHandler(
       }
     } catch (error) {
       Sentry.captureException(error);
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: error.message,
-        }),
-      };
+      return res.status(400).json({
+        status: false,
+        message: error.message,
+      });
     }
   }
-);
+
 
 /// update user team
-module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async (event) => {
-  const requestBody = JSON.parse(event.body);
+const updateUserTeam = async (req, res) => {
+  const requestBody = req.body;
   const team = requestBody.team;
 
   try {
     const token = await verifyToken(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
     );
     if (token == null) {
-      return {
-        statusCode: 401,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "Token has expired. Logout and Signin again.",
-        }),
-      };
+      return res.status(401).json({
+        status: false,
+        message: "Token has expired. Logout and Signin again.",
+      });
     }
     const userId = await Users.update(
       {
@@ -354,43 +292,30 @@ module.exports.updateUserTeam = Sentry.AWSLambda.wrapHandler(async (event) => {
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).json({
+      status: false,
+      message: error.message,
+    });
   }
-});
+}
 
 /// invitation endpoint - new members are added by the creator by email invitation
-module.exports.inviteMembers = Sentry.AWSLambda.wrapHandler(async (event) => {
+const inviteMembers = async (req, res) => {
+
   try {
     const token = await verifyToken(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
     );
     if (token == null) {
-      return {
-        statusCode: 401,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "Token has expired. Logout and Signin again.",
-        }),
-      };
+      return res.status(401).json({
+        status: false,
+        message: "Token has expired. Logout and Signin again.",
+      });
     }
 
-    const requestBody = JSON.parse(event.body);
+    const requestBody = req.body;
     const emails = requestBody.emails;
     for (const email in emails) {
       const data = {
@@ -421,42 +346,29 @@ module.exports.inviteMembers = Sentry.AWSLambda.wrapHandler(async (event) => {
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).json({
+      status: false,
+      message: error.message,
+    });
   }
-});
+}
 
-module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async (event) => {
-  const requestBody = JSON.parse(event.body);
+const updateUserToken = async (req, res) => {
+
+  const requestBody = req.body;
   const fcm_token = requestBody.fcm_token;
 
   try {
     const token = await verifyToken(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
     );
     if (token == null) {
-      return {
-        statusCode: 401,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "Token has expired. Logout and Signin again.",
-        }),
-      };
+      return res.status(401).json({
+        status: false,
+        message: "Token has expired. Logout and Signin again.",
+      });
     }
     const userId = await Users.update(
       {
@@ -496,41 +408,27 @@ module.exports.updateUserToken = Sentry.AWSLambda.wrapHandler(async (event) => {
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).json({
+      status: false,
+      message: error.message,
+    });
   }
-});
+}
 
 /// get user INFORMATION
-module.exports.getUserInformation = Sentry.AWSLambda.wrapHandler(
-  async (event) => {
+const getUserInformation = async (req, res) => {
+
     try {
       const token = await verifyToken(
-        event.headers.Authorization === undefined
-          ? event.headers.authorization
-          : event.headers.Authorization
+        req.headers.Authorization === undefined
+          ? req.headers.authorization
+          : req.headers.Authorization
       );
       if (token == null) {
-        return {
-          statusCode: 401,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: false,
-            message: "Token has expired. Logout and Signin again.",
-          }),
-        };
+        return res.status(401).json({
+          status: false,
+          message: "Token has expired. Logout and Signin again.",
+        });
       }
       const user = await Users.findOne({
         where: {
@@ -566,48 +464,34 @@ module.exports.getUserInformation = Sentry.AWSLambda.wrapHandler(
       }
     } catch (error) {
       Sentry.captureException(error);
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: error.message,
-        }),
-      };
+      return res.status(400).json({
+        status: false,
+        message: error.message,
+      });
     }
   }
-);
+
 
 /// update user INFORMATION
-module.exports.updateUserInformation = Sentry.AWSLambda.wrapHandler(
-  async (event) => {
+const updateUserInformation = async (req, res) => {
+
     try {
-      const requestBody = JSON.parse(event.body);
+      const requestBody = req.body;
       const name = requestBody.name;
       const email = requestBody.email;
       const phone = requestBody.phone_number;
       const picture = requestBody.picture;
 
       const token = await verifyToken(
-        event.headers.Authorization === undefined
-          ? event.headers.authorization
-          : event.headers.Authorization
+        req.headers.Authorization === undefined
+          ? req.headers.authorization
+          : req.headers.Authorization
       );
       if (token == null) {
-        return {
-          statusCode: 401,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: false,
-            message: "Token has expired. Logout and Signin again.",
-          }),
-        };
+        return res.status(401).json({
+          status: false,
+          message: "Token has expired. Logout and Signin again.",
+        });
       }
       const user = await Users.update(
         {
@@ -650,41 +534,28 @@ module.exports.updateUserInformation = Sentry.AWSLambda.wrapHandler(
       }
     } catch (error) {
       Sentry.captureException(error);
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: error.message,
-        }),
-      };
+      return res.status(400).json({
+        status: false,
+        message: error.message,
+      });
     }
   }
-);
+
 
 /// list user in an organization
-module.exports.listMembers = Sentry.AWSLambda.wrapHandler(async (event) => {
+const listMembers = async (req, res) => {
+
   try {
     const token = await verifyToken(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
     );
     if (token == null) {
-      return {
-        statusCode: 401,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "Token has expired. Logout and Signin again.",
-        }),
-      };
+      return res.status(401).json({
+        status: false,
+        message: "Token has expired. Logout and Signin again.",
+      });
     }
 
     const users = await Users.findAll({
@@ -724,21 +595,24 @@ module.exports.listMembers = Sentry.AWSLambda.wrapHandler(async (event) => {
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    
+    return res.status(400).json({
+      status: false,
+      message: error.message,
+    });
   }
-});
+}
 
 
 module.exports = {
-    login,
-}
+  login,
+  createOrganization,
+  getOrganizations,
+  getOrganizationById,
+  updateUserTeam,
+  inviteMembers,
+  updateUserToken,
+  getUserInformation,
+  updateUserInformation,
+  listMembers,
+};
