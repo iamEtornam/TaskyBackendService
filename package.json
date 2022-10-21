@@ -7,9 +7,7 @@
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
-    "cloudinary": "^1.30.0",
-    "connect-multiparty": "^2.2.0",
-    "crypto": "^1.0.1",
+    "@sentry/node": "^7.16.0",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "firebase-admin": "^7.4.0",
