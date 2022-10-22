@@ -17,11 +17,15 @@ You can locate the documentation for the web service [here](https://documenter.g
 
 ## To Run and Deploy
 To run development, run
+
 ```npm install```
+
 ```npm run dev```
 
 To run prod, run
+
 ```npm install```
+
 ```npm run start```
 
 ### To deploy
