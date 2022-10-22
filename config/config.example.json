@@ -1,0 +1,51 @@
+{
+  "development": {
+    "username": "root",
+    "password": null,
+    "database": "database_development",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+      }
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+      }
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "pool": {
+      "max": 5,
+      "min": 0,
+      "acquire": 30000,
+      "idle": 10000
+      }
+  },
+  "mailserver":{
+    "apiKey":"<MAIL-GUN API KEY HERE>",
+    "domain":"<DOMAIN HRER>"
+  },
+  "sentry":{
+    "apiKey":"API-KEY-HERE"
+  },
+  "CLOUDINARY_API_KEY":"",
+  "CLOUDINARY_SECRET_KEY":"",
+  "CLOUD_NAME":""
+}
