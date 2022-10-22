@@ -1,7 +1,7 @@
 "use strict";
-const db = require("./models");
+const db = require("../models");
 const Sentry = require("@sentry/node");
-const utils = require("./utils");
+const utils = require("../utils/utils");
 const Users = db.user;
 
 /// verify token code from client and return user data
@@ -9,7 +9,7 @@ module.exports.login = async function rootHandler(req, res) {
   const { token } = req.body;
 
   try {
-    const decodedToken = utils.verifyToken(token);
+    const decodedToken = await utils.verifyToken(token);
     if (!decodedToken) {
       return res.status(401).send({
         status: false,
@@ -21,7 +21,7 @@ module.exports.login = async function rootHandler(req, res) {
       const uid = decodedToken.uid;
 
       //get user data from database
-      const user = await updateOrCreate(
+      const user = await utils.updateOrCreate(
         Users,
         {
           name: decodedToken.name,
@@ -93,29 +93,16 @@ module.exports.updateUserToken = async function rootHandler(req, res) {
     );
     console.log(userId, "userId");
     if (userId) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "User token updated",
-        }),
-      };
+      return res.status(200).json({
+        status: true,
+        message: "User token updated",
+      });
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "user not found",
-        }),
-      };
+      return res.status(404).json({
+        status: false,
+        message: "user not found",
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
@@ -147,34 +134,22 @@ module.exports.getUserInformation = async function rootHandler(req, res) {
       include: ["organization"],
     });
     if (user) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "User information",
-          data: user,
-        }),
-      };
+      return res.status(200).json({
+        status: true,
+        message: "User information",
+        data: user,
+      });
+
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "user not found",
-        }),
-      };
+      return res.status(404).json({
+        status: false,
+        message: "user not found",
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
-    
+
     return res.status(400).json({
       status: false,
       message: error.message,
@@ -215,43 +190,24 @@ module.exports.updateUserInformation = async function rootHandler(req, res) {
     );
     console.log(user, "userId");
     if (user) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "User information updated",
-          data: user,
-        }),
-      };
+      return res.status(200).json({
+        status: true,
+        message: "User information updated",
+        data: user,
+      });
+
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "user not found",
-        }),
-      };
+      return res.status(404).json({
+        status: false,
+        message: "user not found",
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).json({
+      status: false,
+      message: error.message,
+    });
   }
 };

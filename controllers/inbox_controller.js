@@ -1,9 +1,9 @@
 "use strict";
-const db = require("./models");
+const db = require("../models");
 const Sentry = require("@sentry/node");
 const Inbox = db.inbox;
 const Comment = db.comment;
-const utils = require("./utils");
+const utils = require("../utils/utils");
 
 //*************** INBOX */
 module.exports.getUserInbox = async function rootHandler(req, res) {
@@ -22,7 +22,7 @@ module.exports.getUserInbox = async function rootHandler(req, res) {
 
     const inbox = await Inbox.findAll({
       where: {
-        userId: req.pathParameters.userId,
+        userId: req.params.userId,
       },
       include: ["comments", "user"],
       attributes: {
@@ -31,44 +31,25 @@ module.exports.getUserInbox = async function rootHandler(req, res) {
     });
 
     if (inbox) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "List of messages",
-          data: inbox,
-        }),
-      };
+      return res.status(200).send({
+        status: true,
+        message: "List of messages",
+        data: inbox,
+      });
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "No Messages found",
-        }),
-      };
+      return res.status(404).send({
+        status: true,
+        message: "List of messages",
+        data: inbox,
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
 };
 
@@ -86,51 +67,30 @@ module.exports.getUserInboxComment = async function rootHandler(req, res) {
       });
     }
 
-    const coments = await Comment.findAll({
+    const comments = await Comment.findAll({
       where: {
-        inboxId: req.pathParameters.inboxId,
+        inboxId: req.params.inboxId,
       },
       include: ["user"],
     });
 
-    if (coments) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "List of comment of an inbox",
-          data: coments,
-        }),
-      };
+    if (comments) {
+      return res.status(200).send({
+        status: true,
+        message: "List of comment of an inbox",
+        data: comments,
+      });
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "No comment found",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "No comment found",
+      });
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
 };

@@ -3,11 +3,8 @@ const router = express.Router();
 const userController = require("../controllers/user_controller");
 const taskController = require("../controllers/task_controller");
 const organizationController = require("../controllers/organization_controller");
-
-/* GET home page. */
-router.get("/heart-beat", function (req, res, next) {
-  return res.send('Alive and kicking...');
-});
+const inboxController = require("../controllers/inbox_controller");
+const { checkHealth } = require('../controllers/health_controller');
 
 router.post("/login", userController.login);
 router.get("/getOrganizations", organizationController.getOrganizations);
@@ -26,7 +23,9 @@ router.get("/listMembers/:organizationId", organizationController.listMembers);
 router.get("/getTasks/:organizationId", taskController.getTasks);
 router.patch("/updateTask/:userId", taskController.updateTask);
 router.get("/getTaskStatusCount/:userId", taskController.getTaskStatusCount);
-router.get("/getUserInbox/:userId", taskController.getUserInbox);
-router.get("/getUserInboxComment/:inboxId", taskController.getUserInboxComment);
+router.get("/getUserInbox/:userId", inboxController.getUserInbox);
+router.get("/getUserInboxComment/:inboxId", inboxController.getUserInboxComment);
+/* GET health status */
+router.get('/heart-beat', checkHealth)
 
 module.exports = router;

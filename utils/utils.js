@@ -1,4 +1,6 @@
-async function verifyToken(authorization) {
+const admin = require("firebase-admin");
+
+module.exports.verifyToken = async function verifyToken(authorization) {
   console.log(authorization, "authorization");
   try {
     if (authorization === undefined) {
@@ -13,7 +15,7 @@ async function verifyToken(authorization) {
   }
 }
 
-function updateOrCreate(model, values, condition) {
+module.exports.updateOrCreate = function updateOrCreate(model, values, condition) {
   return model
     .findOne({
       where: condition,

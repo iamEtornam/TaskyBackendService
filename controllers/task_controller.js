@@ -1,12 +1,13 @@
 "use strict";
-const db = require("./models");
+const db = require("../models");
 const Sentry = require("@sentry/node");
+const utils = require("../utils/utils");
 const Tasks = db.task;
 const Users = db.user;
 
 //create new task
-module.exports.createTask = Sentry.AWSLambda.wrapHandler(async (event) => {
-  const requestBody = JSON.parse(event.body);
+module.exports.createTask = async function rootHandler(req, res) {
+  const requestBody = req.body;
   const description = requestBody.description;
   const due_date = requestBody.due_date;
   const is_reminder = requestBody.is_reminder;
@@ -17,10 +18,10 @@ module.exports.createTask = Sentry.AWSLambda.wrapHandler(async (event) => {
   const priority_level = requestBody.priority_level;
 
   try {
-    const token = await verifyToken(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization
+    const token = await utils.verifyToken(
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
     );
     if (token == null) {
       return res.status(401).send({
@@ -41,55 +42,34 @@ module.exports.createTask = Sentry.AWSLambda.wrapHandler(async (event) => {
     });
 
     if (task) {
-      return {
-        statusCode: 201,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "Task created successfully!",
-          data: task,
-        }),
-      };
+      return res.status(201).send({
+        status: true,
+        message: "Task created successfully!",
+        data: task,
+      });
+
     } else {
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "Could not create task",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "Could not create task",
+      });
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
-});
+};
 
 //get task by organization id
-module.exports.getTasks = Sentry.AWSLambda.wrapHandler(async (event) => {
+module.exports.getTasks = async function rootHandler(req, res) {
   try {
-    console.log(event.headers);
-    const token = await verifyToken(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization
+    const token = await utils.verifyToken(
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
     );
     if (token == null) {
       return res.status(401).send({
@@ -100,7 +80,7 @@ module.exports.getTasks = Sentry.AWSLambda.wrapHandler(async (event) => {
 
     const tasks = await Tasks.findAll({
       where: {
-        organizationId: event.pathParameters.organizationId,
+        organizationId: req.params.organizationId,
       },
       attributes: {
         exclude: ["auth_token"], ///remove auth_token from the results
@@ -133,51 +113,31 @@ module.exports.getTasks = Sentry.AWSLambda.wrapHandler(async (event) => {
         }
       }
 
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "List of tasks for Organization",
-          data: allTasks,
-        }),
-      };
+      return res.status(200).send({
+        status: true,
+        message: "List of tasks for Organization",
+        data: allTasks,
+      });
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "No task found",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "No task found",
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
-});
+};
 
 ///update task completion
 //TODO: send notification to all assignees of changes
-module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async (event) => {
-  const requestBody = JSON.parse(event.body);
+module.exports.updateTask = async function rootHandler(req, res) {
+  const requestBody = req.body;
   const status = requestBody.status;
   const description = requestBody.description;
   const due_date = requestBody.due_date;
@@ -187,16 +147,16 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async (event) => {
   const priority_level = requestBody.priority_level;
 
   try {
-    const token = await verifyToken(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization
+    const token = await utils.verifyToken(
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
     );
 
     console.log(
-      event.headers.Authorization === undefined
-        ? event.headers.authorization
-        : event.headers.Authorization,
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization,
       "token"
     );
     if (token == null) {
@@ -208,7 +168,7 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async (event) => {
 
     const task = await Tasks.findOne({
       where: {
-        id: event.pathParameters.id,
+        id: req.params.id,
       },
     });
     if (task) {
@@ -224,135 +184,94 @@ module.exports.updateTask = Sentry.AWSLambda.wrapHandler(async (event) => {
       if (updatedTask) {
         const task = await Tasks.findOne({
           where: {
-            id: event.pathParameters.id,
+            id: req.params.id,
           },
         });
-        return {
-          statusCode: 200,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: true,
-            message: "Task updated!",
-            data: task,
-          }),
-        };
+        return res.status(200).send({
+          status: true,
+          message: "Task updated!",
+          data: task,
+        });
+
       } else {
-        return {
-          statusCode: 400,
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-          },
-          body: JSON.stringify({
-            status: false,
-            message: "Could not update task status",
-          }),
-        };
+        return res.status(400).send({
+          status: false,
+          message: "Could not update task status",
+        });
       }
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "No task found",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "No task found",
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
-});
+};
 
 ///get tasks status count
-module.exports.getTaskStatusCount = Sentry.AWSLambda.wrapHandler(
-  async (event) => {
-    try {
-      const token = await verifyToken(
-        event.headers.Authorization === undefined
-          ? event.headers.authorization
-          : event.headers.Authorization
-      );
-      if (token == null) {
-        return res.status(401).send({
-          status: false,
-          message: "Token has expired. Logout and Signin again.",
-        });
-      }
-      const stats = [];
-      const todoTask = await Tasks.count({
-        where: {
-          created_by: event.pathParameters.userId,
-          status: "todo",
-        },
+module.exports.getTaskStatusCount = async function rootHandler(req, res) {
+  try {
+    const token = await utils.verifyToken(
+      req.headers.Authorization === undefined
+        ? req.headers.authorization
+        : req.headers.Authorization
+    );
+    if (token == null) {
+      return res.status(401).send({
+        status: false,
+        message: "Token has expired. Logout and Signin again.",
       });
-
-      const inProgressTask = await Tasks.count({
-        where: {
-          created_by: event.pathParameters.userId,
-          status: "in progress",
-        },
-      });
-
-      const completedTask = await Tasks.count({
-        where: {
-          created_by: event.pathParameters.userId,
-          status: "completed",
-        },
-      });
-
-      stats.push({
-        todo: todoTask == null ? 0 : todoTask,
-      });
-      stats.push({
-        in_progress: inProgressTask == null ? 0 : inProgressTask,
-      });
-      stats.push({
-        completed: completedTask == null ? 0 : completedTask,
-      });
-
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "Statistic for Tasks",
-          data: stats,
-        }),
-      };
-    } catch (error) {
-      Sentry.captureException(error);
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: error.message,
-        }),
-      };
     }
+    const stats = [];
+    const todoTask = await Tasks.count({
+      where: {
+        created_by: req.params.userId,
+        status: "todo",
+      },
+    });
+
+    const inProgressTask = await Tasks.count({
+      where: {
+        created_by: req.params.userId,
+        status: "in progress",
+      },
+    });
+
+    const completedTask = await Tasks.count({
+      where: {
+        created_by: req.params.userId,
+        status: "completed",
+      },
+    });
+
+    stats.push({
+      todo: todoTask == null ? 0 : todoTask,
+    });
+    stats.push({
+      in_progress: inProgressTask == null ? 0 : inProgressTask,
+    });
+    stats.push({
+      completed: completedTask == null ? 0 : completedTask,
+    });
+
+    return res.status(200).send({
+      status: true,
+      message: "Statistic for Tasks",
+      data: stats,
+    });
+
+  } catch (error) {
+    Sentry.captureException(error);
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
-);
+};

@@ -1,12 +1,12 @@
 "use strict";
-const db = require("./models");
+const db = require("../models");
 const Sentry = require("@sentry/node");
 const mailgun = require("mailgun-js");
 const Organizations = db.organization;
 const Users = db.user;
-const utils = require("./utils");
+const utils = require("../utils/utils");
 const env = process.env.NODE_ENV || "mailserver";
-const mailConfig = require(__dirname + "/config/config.json")[env];
+const mailConfig = require("../config/config.json")[env];
 
 const mg = mailgun({
   apiKey: mailConfig.apiKey,
@@ -48,45 +48,24 @@ module.exports.createOrganization = async function rootHandler(req, res) {
           },
         }
       );
+      return res.status(201).send({
+        status: true,
+        message: "Organization has been created.",
+        data: organizations,
+      });
 
-      return {
-        statusCode: 201,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "Organization has been created.",
-          data: organizations,
-        }),
-      };
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "Could not create organization",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "Could not create organization",
+      });
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
 };
 
@@ -108,44 +87,24 @@ module.exports.getOrganizations = async function rootHandler(req, res) {
       order: [["id", "DESC"]],
     });
     if (organizations) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "List of all organizations",
-          data: organizations,
-        }),
-      };
+      return res.status(200).send({
+        status: true,
+        message: "List of all organizations",
+        data: organizations,
+      });
+
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "organizations not found",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "organizations not found",
+      });
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
 };
 
@@ -165,49 +124,29 @@ module.exports.getOrganizationById = async function rootHandler(req, res) {
     }
     const organizations = await Organizations.findOne({
       where: {
-        id: req.pathParameters.id,
+        id: req.params.id,
       },
       include: ["members"],
     });
     if (organizations) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "List of all organizations",
-          data: organizations,
-        }),
-      };
+      return res.status(200).send({
+        status: true,
+        message: "List of all organizations",
+        data: organizations,
+      });
+
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "organizations not found",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "organizations not found",
+      });
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
 };
 
@@ -246,44 +185,25 @@ module.exports.updateUserTeam = async function rootHandler(req, res) {
         },
         include: ["organization"],
       });
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "User information updated",
-          data: updatedUser,
-        }),
-      };
+      return res.status(200).send({
+        status: true,
+        message: "User information updated",
+        data: updatedUser,
+      });
+
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "user not found",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "user not found",
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "PATCH, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
 };
 
@@ -315,17 +235,11 @@ module.exports.inviteMembers = async function rootHandler(req, res) {
       if (email === emails.length - 1) {
         const isSent = await mg.messages().send(data);
         if (isSent) {
-          return {
-            statusCode: 200,
-            headers: {
-              "Access-Control-Allow-Origin": "*",
-              "Access-Control-Allow-Methods": "POST, OPTIONS",
-            },
-            body: JSON.stringify({
-              status: true,
-              message: "Invitation sent!",
-            }),
-          };
+          return res.status(200).send({
+            status: true,
+            message: "Invitation sent!",
+          });
+
         } else {
           await mg.messages().send(data);
         }
@@ -333,17 +247,11 @@ module.exports.inviteMembers = async function rootHandler(req, res) {
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
+
   }
 };
 
@@ -364,7 +272,7 @@ module.exports.listMembers = async function rootHandler(req, res) {
 
     const users = await Users.findAll({
       where: {
-        organizationId: req.pathParameters.organizationId,
+        organizationId: req.params.organizationId,
       },
       attributes: {
         exclude: ["auth_token"], ///remove auth_token from the results
@@ -372,43 +280,24 @@ module.exports.listMembers = async function rootHandler(req, res) {
     });
 
     if (users) {
-      return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: true,
-          message: "Users in the organization",
-          data: users,
-        }),
-      };
+      return res.status(200).send({
+        status: true,
+        message: "Users in the organization",
+        data: users,
+      });
+
     } else {
-      return {
-        statusCode: 404,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, OPTIONS",
-        },
-        body: JSON.stringify({
-          status: false,
-          message: "users not found",
-        }),
-      };
+      return res.status(404).send({
+        status: false,
+        message: "users not found",
+      });
+
     }
   } catch (error) {
     Sentry.captureException(error);
-    return {
-      statusCode: 400,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, OPTIONS",
-      },
-      body: JSON.stringify({
-        status: false,
-        message: error.message,
-      }),
-    };
+    return res.status(400).send({
+      status: false,
+      message: error.message,
+    });
   }
 };
