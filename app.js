@@ -4,7 +4,7 @@ const Sentry = require("@sentry/node");
 const config = require(__dirname + "/config/config.json")["sentry"];
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
-
+require("dotenv").config();
 const indexRouter = require('./routes/index');
 
 Sentry.init({ dsn: config.apiKey });
