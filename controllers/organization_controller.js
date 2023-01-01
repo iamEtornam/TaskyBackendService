@@ -1,17 +1,17 @@
 "use strict";
 const db = require("../models");
 const Sentry = require("@sentry/node");
-const mailgun = require("mailgun-js");
+// const mailgun = require("mailgun-js");
 const Organizations = db.organization;
 const Users = db.user;
 const utils = require("../utils/utils");
-const env = process.env.NODE_ENV || "mailserver";
-const mailConfig = require("../config/config.json")[env];
+// const env = process.env.NODE_ENV || "mailserver";
+// const mailConfig = require("../config/config.json")[env];
 
-const mg = mailgun({
-  apiKey: mailConfig.apiKey,
-  domain: mailConfig.domain,
-});
+// const mg = mailgun({
+//   apiKey: mailConfig.apiKey,
+//   domain: mailConfig.domain,
+// });
 
 /// create a new organization
 module.exports.createOrganization = async function rootHandler(req, res) {
