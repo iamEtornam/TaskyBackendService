@@ -1,15 +1,31 @@
 const express = require('express');
 const logger = require('morgan');
 const Sentry = require("@sentry/node");
-const config = require(__dirname + "/config/config.json")["sentry"];
 const admin = require("firebase-admin");
 const serviceAccount = require("./serviceAccountKey.json");
 require("dotenv").config();
 const indexRouter = require('./routes/index');
-
-Sentry.init({ dsn: config.apiKey });
+// Importing @sentry/tracing patches the global hub for tracing to work.
+const Tracing = require("@sentry/tracing");
 
 const app = express();
+
+Sentry.init({
+  dsn: process.env.SENTRY_API_KEY,
+  environment: process.env.NODE_ENV,
+  integrations: [
+    // enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // enable Express.js middleware tracing
+    new Tracing.Integrations.Express({ app }),
+  ],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
+
 
 app.use(logger('dev'));
 app.use(express.json());
