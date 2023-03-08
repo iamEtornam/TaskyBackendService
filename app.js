@@ -1,10 +1,11 @@
-const express = require('express');
-const logger = require('morgan');
+require("dotenv").config();
+
+const express = require("express");
+const logger = require("morgan");
 const Sentry = require("@sentry/node");
 const admin = require("firebase-admin");
-const serviceAccount = require("./serviceAccountKey.json");
-require("dotenv").config();
-const indexRouter = require('./routes/index');
+const utils = require("./utils/utils");
+const indexRouter = require("./routes/index");
 // Importing @sentry/tracing patches the global hub for tracing to work.
 const Tracing = require("@sentry/tracing");
 
@@ -26,33 +27,36 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-
-app.use(logger('dev'));
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(Sentry.Handlers.requestHandler());
 app.use(Sentry.Handlers.errorHandler());
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+utils
+  .generateTempFile("service.json", process.env.GOOGLE_SERVICE_KEY)
+  .then((serviceAccount) => {
+    return admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  });
 
-app.use('api/v1/', indexRouter);
+app.use("api/v1/", indexRouter);
 
 app.use(
-    Sentry.Handlers.errorHandler({
-      shouldHandleError(error) {
-        // show only report errors with these status code
-        if (
-            error.status === 401 ||
-            error.status === 500 ||
-            error.status === 400
-        ) {
-          return true;
-        }
-        return false;
-      },
-    })
+  Sentry.Handlers.errorHandler({
+    shouldHandleError(error) {
+      // show only report errors with these status code
+      if (
+        error.status === 401 ||
+        error.status === 500 ||
+        error.status === 400
+      ) {
+        return true;
+      }
+      return false;
+    },
+  })
 );
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
