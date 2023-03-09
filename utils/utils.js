@@ -1,16 +1,16 @@
 const admin = require("firebase-admin");
 
 module.exports.verifyToken = async function verifyToken(authorization) {
-  console.log(authorization, "authorization");
   try {
     if (authorization === undefined) {
       return;
     }
 
     const result = authorization.split(" ");
-    return await admin.auth().verifyIdToken(result[1]);
+    const authorizationToken = result[1];
+    return await admin.auth().verifyIdToken(authorizationToken);
   } catch (error) {
-    console.log(error, "token error");
+    console.log("token error",error);
     return;
   }
 }

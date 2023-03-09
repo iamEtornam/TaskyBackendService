@@ -1,15 +1,20 @@
 require("dotenv").config();
-
+const createError = require('http-errors');
 const express = require("express");
 const logger = require("morgan");
+const cors = require("cors");
 const Sentry = require("@sentry/node");
 const admin = require("firebase-admin");
 const utils = require("./utils/utils");
-const indexRouter = require("./routes/index");
+const allRouters = require("./routes/all_routes");
 // Importing @sentry/tracing patches the global hub for tracing to work.
 const Tracing = require("@sentry/tracing");
 
 const app = express();
+app.use(cors());
+app.use(logger("dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 Sentry.init({
   dsn: process.env.SENTRY_API_KEY,
@@ -27,9 +32,7 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+
 app.use(Sentry.Handlers.requestHandler());
 app.use(Sentry.Handlers.errorHandler());
 
@@ -41,33 +44,14 @@ utils
     });
   });
 
-app.use("api/v1/", indexRouter);
 
-app.use(
-  Sentry.Handlers.errorHandler({
-    shouldHandleError(error) {
-      // show only report errors with these status code
-      if (
-        error.status === 401 ||
-        error.status === 500 ||
-        error.status === 400
-      ) {
-        return true;
-      }
-      return false;
-    },
-  })
-);
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404));
-});
+app.use("/api/v1", allRouters);
 
 // error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
-  res.locals.error = req.app.get("env") === "development" ? err : {};
+  res.locals.error = err;
 
   // render the error page
   res.status(err.status || 500);

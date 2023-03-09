@@ -6,7 +6,7 @@ const Comment = db.comment;
 const utils = require("../utils/utils");
 
 //*************** INBOX */
-module.exports.getUserInbox = async function rootHandler(req, res) {
+const getUserInbox = async function rootHandler(req, res) {
   try {
     const token = await utils.verifyToken(
       req.headers.Authorization === undefined
@@ -42,7 +42,6 @@ module.exports.getUserInbox = async function rootHandler(req, res) {
         message: "List of messages",
         data: inbox,
       });
-
     }
   } catch (error) {
     Sentry.captureException(error);
@@ -53,7 +52,7 @@ module.exports.getUserInbox = async function rootHandler(req, res) {
   }
 };
 
-module.exports.getUserInboxComment = async function rootHandler(req, res) {
+const getUserInboxComment = async function rootHandler(req, res) {
   try {
     const token = await utils.verifyToken(
       req.headers.Authorization === undefined
@@ -93,4 +92,9 @@ module.exports.getUserInboxComment = async function rootHandler(req, res) {
       message: error.message,
     });
   }
+};
+
+module.exports = {
+  getUserInbox,
+  getUserInboxComment,
 };

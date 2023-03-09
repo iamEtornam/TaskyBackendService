@@ -37,6 +37,7 @@ module.exports.login = async function rootHandler(req, res) {
       );
 
       if (user) {
+            console.log(user);
         return res.status(201).json({
           status: true,
           message: "Authentication successful",
