@@ -28,7 +28,6 @@ const server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
-console.log("port", port);
 /**
  * Normalize a port into a number, string, or false.
  */
@@ -54,7 +53,6 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-console.log("onError", error);
 
   if (error.syscall !== 'listen') {
     throw error;
@@ -89,6 +87,5 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
-console.log("onListening", addr);
 
 }
