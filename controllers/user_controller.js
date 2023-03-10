@@ -2,6 +2,7 @@
 const db = require("../models");
 const Sentry = require("@sentry/node");
 const utils = require("../utils/utils");
+const admin = require("firebase-admin");
 const Users = db.user;
 
 /// verify token code from client and return user data
@@ -9,7 +10,8 @@ module.exports.login = async function rootHandler(req, res) {
   const { token } = req.body;
 
   try {
-    const decodedToken = await utils.verifyToken(token);
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    console.log(decodedToken, "decodedToken");
     if (!decodedToken) {
       return res.status(401).send({
         status: false,
@@ -19,7 +21,7 @@ module.exports.login = async function rootHandler(req, res) {
 
     if (decodedToken) {
       const uid = decodedToken.uid;
-
+   
       //get user data from database
       const user = await utils.updateOrCreate(
         Users,
@@ -37,7 +39,7 @@ module.exports.login = async function rootHandler(req, res) {
       );
 
       if (user) {
-            console.log(user);
+        console.log(user);
         return res.status(201).json({
           status: true,
           message: "Authentication successful",
@@ -103,7 +105,6 @@ module.exports.updateUserToken = async function rootHandler(req, res) {
         status: false,
         message: "user not found",
       });
-
     }
   } catch (error) {
     Sentry.captureException(error);
@@ -140,13 +141,11 @@ module.exports.getUserInformation = async function rootHandler(req, res) {
         message: "User information",
         data: user,
       });
-
     } else {
       return res.status(404).json({
         status: false,
         message: "user not found",
       });
-
     }
   } catch (error) {
     Sentry.captureException(error);
@@ -196,13 +195,11 @@ module.exports.updateUserInformation = async function rootHandler(req, res) {
         message: "User information updated",
         data: user,
       });
-
     } else {
       return res.status(404).json({
         status: false,
         message: "user not found",
       });
-
     }
   } catch (error) {
     Sentry.captureException(error);
