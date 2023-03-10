@@ -8,6 +8,7 @@ module.exports.verifyToken = async function verifyToken(authorization) {
 
     const result = authorization.split(" ");
     const authorizationToken = result[1];
+    console.log("authorizationToken", authorizationToken);
     return await admin.auth().verifyIdToken(authorizationToken);
   } catch (error) {
     console.log("token error",error);

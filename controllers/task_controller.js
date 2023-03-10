@@ -87,30 +87,27 @@ module.exports.getTasks = async function rootHandler(req, res) {
       },
       include: ["organization", "creator"],
     });
+ 
     if (tasks) {
       const participants = [];
       const allTasks = [];
       console.log(tasks[0].created_by, "tasks");
 
       for (const iterator of tasks) {
-        if (tasks.indexOf(iterator) + 1 < tasks.length) {
-          for (const assignee of iterator.assignees) {
+
+        for (const assignee of iterator.assignees) {
+            console.log("assignee", assignee);
             const user = await Users.findOne({
               where: {
                 id: assignee,
               },
             });
-            console.log(iterator.assignees.indexOf(assignee));
-            if (
-              iterator.assignees.indexOf(assignee) + 1 <
-              iterator.assignees.length
-            ) {
+     
               participants.push(user);
-            }
           }
           iterator.assignees = participants;
           allTasks.push(iterator);
-        }
+
       }
 
       return res.status(200).send({

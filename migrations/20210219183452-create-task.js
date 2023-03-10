@@ -1,48 +1,49 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('tasks', {
+    await queryInterface.createTable("tasks", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       description: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
       due_date: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       is_reminder: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
       },
       assignees: {
-        type: Sequelize.ARRAY(Sequelize.JSONB)
+        type: Sequelize.ARRAY(Sequelize.JSONB),
       },
       organizationId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false,
       },
       created_by: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       team: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       status: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       priority_level: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   down: async (queryInterface, Sequelize) => {
