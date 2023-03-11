@@ -24,6 +24,7 @@ router.get("/listMembers/:organizationId", organizationController.listMembers);
 router.get("/getTasks/:organizationId", taskController.getTasks);
 router.patch("/updateTask/:userId", taskController.updateTask);
 router.get("/getTaskStatusCount/:userId", taskController.getTaskStatusCount);
+router.post("/createInbox", inboxController.createInbox);
 router.get("/getUserInbox/:userId", inboxController.getUserInbox);
 router.get(
   "/getUserInboxComment/:inboxId",
