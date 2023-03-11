@@ -2,10 +2,6 @@
   "name": "tasky-webservice",
   "version": "0.0.0",
   "private": true,
-  "engines": {
-    "node": "18.x",
-    "npm": "9.x"
-  },
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon ./bin/www"
@@ -19,6 +15,7 @@
     "dotenv": "^16.0.3",
     "express": "~4.16.1",
     "firebase-admin": "^11.3.0",
+    "helmet": "^6.0.1",
     "morgan": "~1.10.0",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.8.0",

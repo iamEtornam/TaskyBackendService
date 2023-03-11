@@ -2,6 +2,7 @@ require("dotenv").config();
 const createError = require('http-errors');
 const express = require("express");
 const logger = require("morgan");
+const helmet = require("helmet");
 const cors = require("cors");
 const Sentry = require("@sentry/node");
 const admin = require("firebase-admin");
@@ -14,6 +15,7 @@ const app = express();
 app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());
+app.use(helmet());
 app.use(express.urlencoded({ extended: false }));
 
 Sentry.init({
