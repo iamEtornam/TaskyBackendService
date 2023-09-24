@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 require("dotenv").config();
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
+const fs = require("fs");
+const path = require("path");
+const Sequelize = require("sequelize");
 const basename = path.basename(__filename);
 const db = {};
 
@@ -28,17 +28,21 @@ const sequelize = new Sequelize(
   }
 );
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
+fs.readdirSync(__dirname)
+  .filter((file) => {
+    return (
+      file.indexOf(".") !== 0 && file !== basename && file.slice(-3) === ".js"
+    );
   })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+  .forEach((file) => {
+    const model = require(path.join(__dirname, file))(
+      sequelize,
+      Sequelize.DataTypes
+    );
     db[model.name] = model;
   });
 
-Object.keys(db).forEach(modelName => {
+Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
@@ -61,9 +65,9 @@ db.task.belongsTo(db.organization, {
   as: "organization",
 });
 db.task.belongsTo(db.user, {
-	foreignKey: "created_by",
-	as: "creator",
-  });
+  foreignKey: "created_by",
+  as: "creator",
+});
 db.inbox = require("./inbox.js")(sequelize, Sequelize);
 db.comment = require("./comment")(sequelize, Sequelize);
 // db.inbox_comment = require("./inbox_comment")(sequelize, Sequelize);
@@ -71,19 +75,19 @@ db.comment = require("./comment")(sequelize, Sequelize);
 db.inbox.hasMany(db.comment, { as: "comments" });
 db.comment.hasOne(db.inbox, { as: "inbox" });
 
-db.inbox.belongsTo(db.user, { 
+db.inbox.belongsTo(db.user, {
   foreignKey: "userId",
   as: "user",
-   });
-db.comment.belongsTo(db.user, { 
+});
+db.comment.belongsTo(db.user, {
   foreignKey: "userId",
   as: "user",
-  });
-//   db.user.hasMany(db.inbox, { 
+});
+//   db.user.hasMany(db.inbox, {
 //     foreignKey: "userId",
 //     as: "user",
 //     });
-//     db.user.hasMany(db.comment, { 
+//     db.user.hasMany(db.comment, {
 //       foreignKey: "userId",
 //       as: "user",
 //       });
