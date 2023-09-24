@@ -21,7 +21,9 @@ const sequelize = new Sequelize(
     },
     ssl: true,
     dialectOptions: {
-      ssl: true,
+      ssl: {
+        rejectUnauthorized: false, // very important
+      },
     },
   }
 );
