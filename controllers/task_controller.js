@@ -150,12 +150,6 @@ module.exports.updateTask = async function rootHandler(req, res) {
         : req.headers.Authorization
     );
 
-    console.log(
-      req.headers.Authorization === undefined
-        ? req.headers.authorization
-        : req.headers.Authorization,
-      "token"
-    );
     if (token == null) {
       return res.status(401).send({
         status: false,

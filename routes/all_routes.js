@@ -22,7 +22,7 @@ router.get("/getUserInformation", userController.getUserInformation);
 router.post("/createTask", taskController.createTask);
 router.get("/listMembers/:organizationId", organizationController.listMembers);
 router.get("/getTasks/:organizationId", taskController.getTasks);
-router.patch("/updateTask/:userId", taskController.updateTask);
+router.patch("/updateTask/:id", taskController.updateTask);
 router.get("/getTaskStatusCount/:userId", taskController.getTaskStatusCount);
 router.post("/createInbox", inboxController.createInbox);
 router.get("/getUserInbox/:userId", inboxController.getUserInbox);
