@@ -4,8 +4,8 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
 
      await queryInterface.bulkInsert('organizations', [{
-       name: 'Aura Innovations',
-       logo: 'https://images.unsplash.com/photo-1593642533144-3d62aa4783ec?ixid=MXwxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=2250&q=80',
+       name: 'Sources Technologies LLC',
+       logo: 'https://sourcestechnologies.com/lovable-uploads/7fcd793a-3a48-42d2-8f23-f9a50cbaeb57.png',
        teams: ['Backend','Frontend','Mobile','Business Development'],
        createdAt: new Date(),
        updatedAt: new Date()

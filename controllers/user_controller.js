@@ -21,7 +21,7 @@ module.exports.login = async function rootHandler(req, res) {
 
     if (decodedToken) {
       const uid = decodedToken.uid;
-   
+
       //get user data from database
       const user = await utils.updateOrCreate(
         Users,
@@ -180,7 +180,7 @@ module.exports.updateUserInformation = async function rootHandler(req, res) {
       {
         name: name,
         phone_number: phone,
-        picture: picture,
+        picture: picture || undefined,
       },
       {
         where: {
