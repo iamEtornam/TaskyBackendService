@@ -42,6 +42,10 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
+db.inbox = require("./inbox.js")(sequelize, Sequelize);
+db.comment = require("./comment")(sequelize, Sequelize);
+
+// Let the models handle their own associations through the associate method
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
@@ -68,8 +72,6 @@ db.task.belongsTo(db.user, {
   foreignKey: "created_by",
   as: "creator",
 });
-db.inbox = require("./inbox.js")(sequelize, Sequelize);
-db.comment = require("./comment")(sequelize, Sequelize);
 // db.inbox_comment = require("./inbox_comment")(sequelize, Sequelize);
 
 db.inbox.hasMany(db.comment, { as: "comments" });

@@ -11,6 +11,14 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      inbox.hasMany(models.comment, {
+        foreignKey: 'inboxId',
+        as: 'comments'
+      });
+      inbox.belongsTo(models.user, {
+        foreignKey: 'userId',
+        as: 'user'
+      });
     }
   };
   inbox.init({
