@@ -42,22 +42,15 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-db.inbox = require("./inbox.js")(sequelize, Sequelize);
-db.comment = require("./comment")(sequelize, Sequelize);
-
-// Let the models handle their own associations through the associate method
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
-
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 db.organization = require("./organization.js")(sequelize, Sequelize);
 db.user = require("./user.js")(sequelize, Sequelize);
 db.task = require("./task.js")(sequelize, Sequelize);
+db.inbox = require("./inbox.js")(sequelize, Sequelize);
+db.comment = require("./comment")(sequelize, Sequelize);
+
 db.organization.hasMany(db.user, { as: "members" });
 db.organization.hasMany(db.task, { as: "tasks" });
 db.user.belongsTo(db.organization, {
@@ -72,25 +65,12 @@ db.task.belongsTo(db.user, {
   foreignKey: "created_by",
   as: "creator",
 });
-// db.inbox_comment = require("./inbox_comment")(sequelize, Sequelize);
 
-db.inbox.hasMany(db.comment, { as: "comments" });
-db.comment.hasOne(db.inbox, { as: "inbox" });
+// Let the models handle their own associations through the associate method
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
+  }
+});
 
-db.inbox.belongsTo(db.user, {
-  foreignKey: "userId",
-  as: "user",
-});
-db.comment.belongsTo(db.user, {
-  foreignKey: "userId",
-  as: "user",
-});
-//   db.user.hasMany(db.inbox, {
-//     foreignKey: "userId",
-//     as: "user",
-//     });
-//     db.user.hasMany(db.comment, {
-//       foreignKey: "userId",
-//       as: "user",
-//       });
 module.exports = db;
