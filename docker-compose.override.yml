@@ -1,0 +1,13 @@
+# This file is automatically loaded by docker-compose for development overrides
+services:
+  app:
+    # Use nodemon for development hot reloading
+    command: npm run dev
+    volumes:
+      # Mount source code for hot reloading
+      - .:/usr/src/app
+      # Prevent node_modules from being overridden
+      - /usr/src/app/node_modules
+    environment:
+      # Additional development environment variables
+      - DEBUG=tasky-webservice:*
